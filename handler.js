@@ -29,14 +29,14 @@ let thumb
 const qkontak = {
     key: {
         fromMe: false,
-        participant: '13135550002@s.whatsapp.net',
+        participant: '6285393659857@s.whatsapp.net',
         remoteJid: 'status@broadcast',
         id: 'ownername'
     },
     message: {
         contactMessage: {
             displayName: 'Meta AI',
-            vcard: 'BEGIN:VCARD\nVERSION:3.0\nN:;;;;\nFN:nomor prib - 24\nitem1.TEL;waid=13135550002:+13135550002\nitem1.X-ABLabel:Ponsel\nPHOTO;https://files.catbox.moe/4t37oc.jpg\nEND:VCARD',
+            vcard: 'BEGIN:VCARD\nVERSION:3.0\nN:;;;;\nFN:nomor prib - 24\nitem1.TEL;waid=6285393659857:+6285393659857\nitem1.X-ABLabel:Ponsel\nPHOTO;https://files.catbox.moe/piioh4.jpeg\nEND:VCARD',
             sendEphemeral: true
         }
     }
