@@ -141,8 +141,6 @@ const showBanner = async () => {
     say('')
 }
     
-    }
-
 /// ─────────── [ Connection ] ────────── ///
 const store = { bind: () => {} }
 let pluginsLoaded = false
