@@ -49,16 +49,16 @@ jika kamu menginginkan script ini silahkan klik tombol di bawah ini
                                     name: 'cta_url',
                                     buttonParamsJson: JSON.stringify({
                                         display_text: 'Get Script',
-                                        url: 'https://youtube.com/@fyzzx7',
-                                        merchant_url: 'https://www.google.com'
+                                        url: 'https://wa.me/6285393659857',
+                                        merchant_url: 'https://wa.me/6285393659857'
                                     })
                                 },
                                 {
                                     name: 'cta_url',
                                     buttonParamsJson: JSON.stringify({
                                         display_text: 'Web Store',
-                                        url: 'https://www.xwebz.my.id',
-                                        merchant_url: 'https://www.xwebz.my.id'
+                                        url: 'https://wa.me/6285393659857',
+                                        merchant_url: 'https://wa.me/6285393659857'
                                     })
                                 }
                             ]
@@ -67,8 +67,8 @@ jika kamu menginginkan script ini silahkan klik tombol di bawah ini
                             forwardingScore: 9,
                             isForwarded: true,
                             forwardedNewsletterMessageInfo: {
-                                newsletterJid: config.saluranId || '120363428260954472@newsletter',
-                                newsletterName: config.saluranName || 'YorumiMD',
+                                newsletterJid: config.saluranId || '120363431048748349@newsletter',
+                                newsletterName: config.saluranName || 'MCTama',
                                 serverMessageId: 127
                             }
                         }
