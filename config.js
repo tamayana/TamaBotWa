@@ -7,7 +7,7 @@ const config = {
 
   /// ───────── [ saluran ] ───────── ///
   saluranName: 'MCTama', 
-  saluranId: '',
+  saluranId: 'saluranId: '120363431048748349@newsletter',',
   saluranUrl: 'https://whatsapp.com/channel/0029Vb96v4e72WTsFquwB441', 
   
   /// ───────── [ Link Url ] ───────── ///
