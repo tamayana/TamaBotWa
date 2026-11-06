@@ -1,4 +1,6 @@
- 
+<div align="center">
+  <img src="media/banner-tamabotwa.png" width="100%">
+</div>
 <div align="center">
 
 # ⚡ TamaBotWa
