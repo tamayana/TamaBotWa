@@ -2,7 +2,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
 import sharp from 'sharp'
-import { generateWAMessageFromContent } from '@adiwajshing/baileys'
 import config from '../../config.js'
 import { runtime } from '../../lib/myfunc.js'
 import { plugins } from '../../handler.js'
@@ -53,7 +52,7 @@ let handler = async (m, { conn }) => {
         list += `│ └────────\n\n`
     }
     
-    let msg = `\`👋 𝖧𝖾𝗅𝗈, 𝖶𝖾𝗅𝖼𝗈𝗆𝖾\``
+    let msg = `👋 𝖧𝖾𝗅𝗈, 𝖶𝖾𝗅𝖼𝗈𝗆𝖾`
     
     let anu = `◜🔔◞ *./𝖨𝗇𝖿𝗈𝗋𝗆𝖺𝗍𝗂𝗈𝗇.𝗃𝗌*
 └╼ *𝖢𝗋𝖾𝖺𝗍𝗈𝗋:* wa.me/6285393659857
@@ -62,7 +61,7 @@ let handler = async (m, { conn }) => {
 
 ${list}`
 
-    // 1. MUSIK DULU BUNG! PALING ATAS!
+    // 1. MUSIK DULU BUNG!
     try {
         await conn.sendMessage(m.chat, {
             audio: { url: soundPath },
@@ -73,57 +72,21 @@ ${list}`
         console.log('Gagal kirim musik:', e)
     }
 
-    // 2. BARU FOTO LU! YANG TAMA TOPI ITEM ITU!
+    // 2. MENU + FOTO JADI SATU BUNG! PETA NYA UDAH GUA HAPUS!
+    // Atas nya langsung foto TAMA lu, bukan peta item lagi!
     await conn.sendMessage(m.chat, {
         image: fs.readFileSync(thumbPath),
-        caption: msg
-    }, { quoted: m })
-
-    // 3. TERAKHIR BARU MENU NYA!
-    const waMsg = generateWAMessageFromContent(m.chat, {
-        buttonsMessage: {
-            locationMessage: {
-                degreesLatitude: 0,
-                degreesLongitude: 0,
-                name: config.botName,
-                address: `TamaBotWa`,
-                jpegThumbnail: thumb
-            },
-            contentText: msg,
-            footerText: anu,
-            buttons: [
-                {
-                    buttonId: '.menu',
-                    buttonText: { displayText: 'back' },
-                    type: 1
-                }
-            ],
-            headerType: 6
-        }
-    }, {
-        userJid: conn.user.id,
-        quoted: m,
-        messageId: Math.random().toString(36).substring(2, 15).toUpperCase()
-    })
-
-    await conn.relayMessage(m.chat, waMsg.message, {
-        messageId: waMsg.key.id,
-        additionalNodes: [
+        caption: `${msg}\n\n${anu}`,
+        footer: '© Rahmad-Pratama',
+        buttons: [
             {
-                tag: 'biz',
-                attrs: {},
-                content: [
-                    {
-                        tag: 'interactive',
-                        attrs: { type: 'native_flow', v: '1' },
-                        content: [
-                            { tag: 'native_flow', attrs: { v: '9', name: 'mixed' }, content: [] }
-                        ]
-                    }
-                ]
+                buttonId: '.menu',
+                buttonText: { displayText: 'back' },
+                type: 1
             }
-        ]
-    })
+        ],
+        headerType: 4
+    }, { quoted: m })
 }
 
 handler.help = ['allmenu']
