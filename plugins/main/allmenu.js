@@ -1,5 +1,6 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
+import fs from 'fs'
 import sharp from 'sharp'
 import { generateWAMessageFromContent } from '@adiwajshing/baileys'
 import config from '../../config.js'
@@ -45,12 +46,10 @@ let handler = async (m, { conn }) => {
 
     for (let nama of urut) {
         list += `□ ./${nama}.js\n└────────\n`
-
         for (let h of kat[nama].sort()) {
             let noPrefix = /^[^a-z0-9]/i.test(h)
             list += `│ ├─ ${noPrefix ? '' : pref}${h}\n`
         }
-
         list += `│ └────────\n\n`
     }
     
@@ -63,14 +62,32 @@ let handler = async (m, { conn }) => {
 
 ${list}`
 
-    // GUA GANTI JADI GAMBAR BUNG, BUKAN LOKASI LAGI!
-    // Jadi yang muncul gambar TAMA lu, bukan peta item + titik merah!
+    // 1. MUSIK DULU BUNG! PALING ATAS!
+    try {
+        await conn.sendMessage(m.chat, {
+            audio: { url: soundPath },
+            mimetype: 'audio/mpeg',
+            ptt: false
+        }, { quoted: m })
+    } catch (e) {
+        console.log('Gagal kirim musik:', e)
+    }
+
+    // 2. BARU FOTO LU! YANG TAMA TOPI ITEM ITU!
+    await conn.sendMessage(m.chat, {
+        image: fs.readFileSync(thumbPath),
+        caption: msg
+    }, { quoted: m })
+
+    // 3. TERAKHIR BARU MENU NYA!
     const waMsg = generateWAMessageFromContent(m.chat, {
         buttonsMessage: {
-            imageMessage: {
-                jpegThumbnail: thumb,
-                caption: msg,
-                mimetype: 'image/jpeg'
+            locationMessage: {
+                degreesLatitude: 0,
+                degreesLongitude: 0,
+                name: config.botName,
+                address: `TamaBotWa`,
+                jpegThumbnail: thumb
             },
             contentText: msg,
             footerText: anu,
@@ -81,7 +98,7 @@ ${list}`
                     type: 1
                 }
             ],
-            headerType: 4
+            headerType: 6
         }
     }, {
         userJid: conn.user.id,
@@ -107,18 +124,6 @@ ${list}`
             }
         ]
     })
-
-    // INI TAMBAHAN MUSIK NYA BUNG!
-    // Abis menu ke kirim, langsung ke kirim sound.mp3 lu!
-    try {
-        await conn.sendMessage(m.chat, {
-            audio: { url: soundPath },
-            mimetype: 'audio/mpeg',
-            ptt: false
-        }, { quoted: m })
-    } catch (e) {
-        console.log('Gagal kirim musik:', e)
-    }
 }
 
 handler.help = ['allmenu']
