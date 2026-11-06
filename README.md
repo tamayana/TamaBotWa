@@ -176,6 +176,6 @@ If you find this project useful, consider giving it a star!
 
 **THANK YOU FOR VISITING TAMA BOT WA**
 
-<sub>© TamaBotWa — All Rights Reserved.</sub>
+<sub>© Rahmad Pratama — All Rights Reserved.</sub>
 
 </div>
