@@ -48,18 +48,18 @@ let handler = async (m, { conn }) => {
 ${list}`
 
     // 1. MUSIK DULU!
-    try {
-        await conn.sendMessage(m.chat, { audio: { url: soundPath }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m })
-    } catch (e) {}
+    await conn.sendMessage(m.chat, { audio: { url: soundPath }, mimetype: 'audio/mpeg', ptt: false }, { quoted: m })
 
-    // 2. MENU PAKE CARA LAMA LU BUNG! BIAR BACK NYA MUNCUL LAGI!
-    // TAPI locationMessage (PETA) NYA GUA GANTI JADI imageMessage (FOTO LU)!
+    // 2. MENU PAKE KODE ASLI LU 100% BUNG! GAK GUA UBAH!
+    // Ini yang bikin menu + back nya muncul di screenshot 10.44 lu!
     const waMsg = generateWAMessageFromContent(m.chat, {
         buttonsMessage: {
-            imageMessage: {
-                mimetype: 'image/jpeg',
-                jpegThumbnail: thumb,
-                caption: msg
+            locationMessage: {
+                degreesLatitude: 0,
+                degreesLongitude: 0,
+                name: config.botName,
+                address: `TamaBotWa`,
+                jpegThumbnail: thumb // <-- INI FOTO LU BUNG! YANG TAMA ITU!
             },
             contentText: msg,
             footerText: anu,
@@ -70,7 +70,7 @@ ${list}`
                     type: 1
                 }
             ],
-            headerType: 4 // 4 = IMAGE, DULU 6 = LOCATION / PETA!
+            headerType: 6
         }
     }, {
         userJid: conn.user.id,
