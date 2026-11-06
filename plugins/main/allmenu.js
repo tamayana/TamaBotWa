@@ -8,6 +8,7 @@ import { plugins } from '../../handler.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const thumbPath = path.join(__dirname, '../../media/thumb.jpg')
+const soundPath = path.join(__dirname, '../../media/sound.mp3')
 
 let handler = async (m, { conn }) => {
     const total = new Set(plugins.values()).size
@@ -62,14 +63,14 @@ let handler = async (m, { conn }) => {
 
 ${list}`
 
+    // GUA GANTI JADI GAMBAR BUNG, BUKAN LOKASI LAGI!
+    // Jadi yang muncul gambar TAMA lu, bukan peta item + titik merah!
     const waMsg = generateWAMessageFromContent(m.chat, {
         buttonsMessage: {
-            locationMessage: {
-                degreesLatitude: 0,
-                degreesLongitude: 0,
-                name: config.botName,
-                address: `TamaBotWa`,
-                jpegThumbnail: thumb
+            imageMessage: {
+                jpegThumbnail: thumb,
+                caption: msg,
+                mimetype: 'image/jpeg'
             },
             contentText: msg,
             footerText: anu,
@@ -80,7 +81,7 @@ ${list}`
                     type: 1
                 }
             ],
-            headerType: 6
+            headerType: 4
         }
     }, {
         userJid: conn.user.id,
@@ -106,6 +107,18 @@ ${list}`
             }
         ]
     })
+
+    // INI TAMBAHAN MUSIK NYA BUNG!
+    // Abis menu ke kirim, langsung ke kirim sound.mp3 lu!
+    try {
+        await conn.sendMessage(m.chat, {
+            audio: { url: soundPath },
+            mimetype: 'audio/mpeg',
+            ptt: false
+        }, { quoted: m })
+    } catch (e) {
+        console.log('Gagal kirim musik:', e)
+    }
 }
 
 handler.help = ['allmenu']
