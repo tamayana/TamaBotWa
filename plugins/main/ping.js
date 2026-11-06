@@ -190,7 +190,7 @@ let handler = async (m, { conn }) => {
             </div>
 
             <div style="text-align: center; font-size: 11px; color: #52525b; margin-top: 15px; font-family: 'Share Tech Mono', monospace;">
-                HOST: ${hostname.toUpperCase()} <br> ${config.botName || 'YorumiMD'} © 2026
+                HOST: ${hostname.toUpperCase()} <br> ${config.botName || 'TamaBotWa'} © 2026
             </div>
         </div>
     `
@@ -214,7 +214,7 @@ let handler = async (m, { conn }) => {
                 __typename: 'FOAIDNixelButtonSheets',
                 tabs: [{
                     id: 'tab_0',
-                    tab_header: 'Yorumi-MD',
+                    tab_header: 'TamaBotWa',
                     sections: [{
                         __typename: 'GenAIUnifiedResponseSection',
                         view_model: {
