@@ -46,8 +46,8 @@ Setiap donasi yang masuk akan dikelola secara transparan. Jika Anda telah menyel
                                     name: 'cta_url',
                                     buttonParamsJson: JSON.stringify({
                                         display_text: 'Support kami',
-                                        url: 'https://www.youtube.com/FyzzX7',
-                                        merchant_url: 'https://www.youtube.com/FyzzX7'
+                                        url: 'https://www.tiktok.com/@mctama',
+                                        merchant_url: 'https://www.tiktok.com/@mctama'
                                     })
                                 }
                             ]
