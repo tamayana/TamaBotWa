@@ -1,6 +1,12 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+import fs from 'fs'
 import config from '../../config.js'
 import { runtime, tanggal } from '../../lib/myfunc.js'
 import { plugins } from '../../handler.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const thumbPath = path.join(__dirname, '../../media/thumb.jpg')
 
 let handler = async (m, { conn }) => {
     const pushname = m.pushName || 'No Name'
@@ -27,7 +33,8 @@ let handler = async (m, { conn }) => {
 © Rahmad-Pratama`
 
     await conn.sendMessage(m.chat, {
-        text: anu,
+        image: fs.readFileSync(thumbPath),
+        caption: anu,
         contextInfo: {
             forwardingScore: 9,
             isForwarded: true,
