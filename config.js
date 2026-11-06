@@ -2,16 +2,16 @@
 const config = {
   botName: 'TamaBotWa',
   ownerName: 'RahmadPratama',
-  creator: ['6285393659857'], // Isi nomor tanpa tanda + dan spasi, contoh: 6281234567890
+  creator: ['6285393659857'],
   prefix: ['.', '#', '!', '/'],
 
   /// ───────── [ saluran ] ───────── ///
   saluranName: 'MCTama', 
-  saluranId: 'saluranId: '120363431048748349@newsletter',',
+  saluranId: '120363431048748349@newsletter',
   saluranUrl: 'https://whatsapp.com/channel/0029Vb96v4e72WTsFquwB441', 
   
   /// ───────── [ Link Url ] ───────── ///
-  groupUrl: '‎https://chat.whatsapp.com/Eo8q0uI2Jku3kxk5WapwPu?s=cl&p=i&mlu=4&ilr=4&iam=2', 
+  groupUrl: 'https://chat.whatsapp.com/Eo8q0uI2Jku3kxk5WapwPu?s=cl&p=i&mlu=4&ilr=4&iam=2', 
   telegramUrl: 'https://t.me/mctamaaa', 
   whatsappUrl: 'https://wa.me/6285393659857',
   
@@ -21,18 +21,18 @@ const config = {
   ovo: 'Tidak Tersedia', 
   
   /// ───────── [ bot Settings ] ───────── ///
-  botMode: 'public', // public = semua user bisa pakai, self = hanya owner
-  privateOnlyPremium: false, // false = chat pribadi ikut mode bot (public = semua bisa), true = chat pribadi hanya premium/owner
-  swgcDelay: 2500, // jeda antar grup saat swgcall (ms)
+  botMode: 'public',
+  privateOnlyPremium: false,
+  swgcDelay: 2500,
 
   /// ───────── [ 𝖯𝗍𝖾𝗋𝗈𝖽𝖺𝖼𝗍𝗒𝗅 ] ───────── ///
   panel: {
-    domain: 'https://domain.com', // Domain: https://panel.domainkamu.com
-    apikey: 'plta_xxxx', // API Key Application
+    domain: 'https://domain.com',
+    apikey: 'plta_xxxx',
     capikey: '',
-    nestid: '5', // ID Nest
-    egg: '15', // ID Egg
-    loc: '1', // ID Location
+    nestid: '5',
+    egg: '15',
+    loc: '1',
   },
 
   accessDenied: {
