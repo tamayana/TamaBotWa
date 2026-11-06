@@ -56,7 +56,7 @@ let handler = async (m, { conn }) => {
     let msg = `\`👋 𝖧𝖾𝗅𝗈, 𝖶𝖾𝗅𝖼𝗈𝗆𝖾\``
     
     let anu = `◜🔔◞ *./𝖨𝗇𝖿𝗈𝗋𝗆𝖺𝗍𝗂𝗈𝗇.𝗃𝗌*
-└╼ *𝖢𝗋𝖾𝖺𝗍𝗈𝗋:* t.me/FyzzModss
+└╼ *𝖢𝗋𝖾𝖺𝗍𝗈𝗋:* wa.me/6285393659857
 └╼ *𝖵𝖾𝗋𝗌𝗂𝗈𝗇:* 𝟥.𝟢𝟢
 └╼ *𝖱𝗎𝗇 𝖳𝗂𝗆𝖾:* ${runtime(process.uptime())}
 
@@ -68,7 +68,7 @@ ${list}`
                 degreesLatitude: 0,
                 degreesLongitude: 0,
                 name: config.botName,
-                address: `𝖸𝗈𝗋𝗎𝗆𝗂-𝖬𝖣`,
+                address: `TamaBotWa`,
                 jpegThumbnail: thumb
             },
             contentText: msg,
