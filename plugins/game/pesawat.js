@@ -29,7 +29,7 @@ canvas { width: 100%; height: 100%; display: block; background: #070a12; }
   <div class="card">
     <div class="header">
       <div>
-        <div class="title"><span class="dot"></span>Yorumi-MD</div>
+        <div class="title"><span class="dot"></span>Tamaaa</div>
         <h2 style="font-size: 17px; font-weight: 900; color: #fff; margin-top:2px;">Space Rush 🚀</h2>
       </div>
       <div style="text-align: right;">
@@ -50,7 +50,7 @@ canvas { width: 100%; height: 100%; display: block; background: #070a12; }
       <button class="btn btn-right" id="rightBtn">RIGHT ➡️</button>
     </div>
     <div class="credit-bar">
-      Engineered by <span>Yorumi-MD • 2026</span> ⚡
+      Engineered by <span>Tamaaa • 2026</span> ⚡
     </div>
   </div>
 </div>
