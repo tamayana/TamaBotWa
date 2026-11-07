@@ -224,7 +224,7 @@ let handler = async (m, { conn }) => {
   <header>
     <div>
       <div class="tag">SONIC</div>
-      <h1>🔵 YORUMI MULTI-DEVICE</h1>
+      <h1>🔵 TAMAAA MULTI-DEVICE</h1>
     </div>
     <div class="hud">
       <div class="pill">
@@ -257,7 +257,7 @@ let handler = async (m, { conn }) => {
     <canvas id="game" width="960" height="540" aria-label="Game lari dan lompat"></canvas>
     <div class="overlay" id="overlay">
       <div class="panel">
-        <h2 id="panelTitle">WELCOME TO GAME SONIC YORUMI-MD</h2>
+        <h2 id="panelTitle">WELCOME TO GAME SONIC MCTama</h2>
         <p id="panelText">SELAMAT BERMAIN YAH</p>
         <button id="startBtn">▶ GAS CUY MAIN</button>
       </div>
