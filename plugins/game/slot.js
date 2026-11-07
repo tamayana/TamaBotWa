@@ -196,7 +196,7 @@ var box=document.getElementById('reels');for(var c=0;c<5;c++){var d=document.cre
                 __typename: 'FOAIDNixelButtonSheets',
                 tabs: [{
                     id: 'tab_0',
-                    tab_header: 'Yorumi-MD',
+                    tab_header: 'MCTamaaa',
                     sections: [{
                         __typename: 'GenAIUnifiedResponseSection',
                         view_model: {
