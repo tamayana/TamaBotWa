@@ -7,7 +7,7 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
     const isSticker = q.mtype === 'stickerMessage' || /webp/.test(content.mimetype || '')
 
     if (!isSticker) {
-        return RaplyGwe(`Balas stiker dengan perintah:\n*${usedPrefix + command}* packname|author\n\nContoh: *${usedPrefix + command}* Yorumi|Fyzz`)
+        return RaplyGwe(`Balas stiker dengan perintah:\n*${usedPrefix + command}* packname|author\n\nContoh: *${usedPrefix + command}* Tama|MCTama`)
     }
 
     const [packRaw, ...authRaw] = (text || '').split('|')
