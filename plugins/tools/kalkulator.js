@@ -483,7 +483,7 @@ body::after{
     <div class="brand">
       <div class="brand__logo" aria-hidden="true">Y</div>
       <div>
-        <h1 class="brand__name">Yorumi<span>MD</span></h1>
+        <h1 class="brand__name">Rahmad<span>TM</span></h1>
         <p class="brand__sub">Kalkulator Pro</p>
       </div>
     </div>
@@ -1234,7 +1234,7 @@ body::after{
                 __typename: 'FOAIDNixelButtonSheets',
                 tabs: [{
                     id: 'tab_0',
-                    tab_header: 'Yorumi-MD',
+                    tab_header: 'MCTamaaa',
                     sections: [{
                         __typename: 'GenAIUnifiedResponseSection',
                         view_model: {
