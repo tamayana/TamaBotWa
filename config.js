@@ -24,6 +24,7 @@ const config = {
   botMode: 'public',
   privateOnlyPremium: false,
   swgcDelay: 2500,
+  kyzzApikey: 'ISI_KEY_BARU_LU_DISINI',
 
   /// ───────── [ 𝖯𝗍𝖾𝗋𝗈𝖽𝖺𝖼𝗍𝗒𝗅 ] ───────── ///
   panel: {
