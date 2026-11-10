@@ -1,5 +1,10 @@
+// plugins/fun/ceksisaumur.js
 let handler = async (m, { conn }) => {
-    let mentioned = (m.msg?.contextInfo?.mentionedJid?.[0] || m.quoted?.sender || m.sender).replace(/:\d+@/, '@')
+    // AMBIL TARGET: 1. Orang yang di-tag, 2. Orang yang di-reply, 3. Diri sendiri
+    let mentioned = m.mentionedJid?.[0] || m.msg?.contextInfo?.mentionedJid?.[0] || m.quoted?.sender || m.sender
+
+    // BERSIHIN JID BIAR GAK ADA :xx NYA (BUAT JID LID BARU)
+    mentioned = mentioned.replace(/:\d+@/, '@')
 
     // SAMA KAYAK cekgabut & cekpsikopat: Konsisten per user per hari!
     let today = new Date().toISOString().slice(0, 10)
