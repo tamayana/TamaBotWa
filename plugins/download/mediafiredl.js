@@ -2,7 +2,7 @@ import axios from 'axios'
 import config from '../../config.js'
 
 function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return '0 Bytes'
+    if (!bytes) return '0 Bytes'
     const k = 1024
     const dm = decimals < 0 ? 0 : decimals
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
@@ -12,21 +12,22 @@ function formatBytes(bytes, decimals = 2) {
 
 async function mediafire(url) {
     const match = /https?:\/\/(?:www\.)?mediafire\.com\/(?:file|file_premium)\/([a-zA-Z0-9]+)/i.exec(url)
-    if (!match) throw 'URL tidak valid! Pastikan link MediaFire benar.'
+    if (!match) throw new Error('URL tidak valid! Pastikan link MediaFire benar.')
 
     const id = match[1]
     const response = await axios.get(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        timeout: 20000
     })
     const html = response.data
     const dlMatch = html.match(/<a\s+[^>]*?id="downloadButton"[^>]*?href="([^"]+)"/i) || html.match(/<a\s+[^>]*?href="([^"]+)"[^>]*?id="downloadButton"/i)
     const download = dlMatch ? dlMatch[1] : null
-    if (!download) throw 'Gagal mengambil link unduhan dari halaman Mediafire.'
+    if (!download) throw new Error('Gagal mengambil link unduhan dari halaman Mediafire.')
 
-    const infoRes = await axios.get(`https://www.mediafire.com/api/1.5/file/get_info.php?response_format=json&quick_key=${id}`)
+    const infoRes = await axios.get(`https://www.mediafire.com/api/1.5/file/get_info.php?response_format=json&quick_key=${id}`, { timeout: 20000 })
     const json = infoRes.data
 
-    if (json.response.result !== 'Success') throw 'Gagal mengambil info file.'
+    if (json.response.result !== 'Success') throw new Error('Gagal mengambil info file.')
     const info = json.response.file_info
     const size = parseInt(info.size)
 
@@ -48,14 +49,15 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
         return RaplyGwe(`Kirimkan link MediaFire!\nContoh: *${usedPrefix + command}* https://www.mediafire.com/file/xxx/file.zip`)
     }
 
-    await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
-    await RaplyGwe(`Sedang memproses MediaFire...`)
+    await m.react('⏳')
+    await RaplyGwe(`⏳ Sedang memproses MediaFire...`)
 
     try {
         const res = await mediafire(text.trim())
         
         if (res.size > 100 * 1024 * 1024) {
-            throw `Ukuran file terlalu besar (${res.sizeReadable}). WhatsApp hanya mendukung file di bawah 100MB.`
+            await m.react('❌')
+            return RaplyGwe(`❌ Ukuran file terlalu besar (${res.sizeReadable}). WhatsApp hanya mendukung file di bawah 100MB.\n\nLink nya aja ya:\n${res.download}`)
         }
 
         let msg = `✅ *MEDIAFIRE DOWNLOADER*\n\n`
@@ -67,7 +69,7 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
         
         await RaplyGwe(msg)
 
-        const fileRes = await axios.get(res.download, { responseType: 'arraybuffer', timeout: 120000 })
+        const fileRes = await axios.get(res.download, { responseType: 'arraybuffer', timeout: 120000, maxContentLength: 100 * 1024 * 1024 })
         const buffer = Buffer.from(fileRes.data)
 
         await conn.sendMessage(m.chat, {
@@ -86,10 +88,10 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
             }
         }, { quoted: m })
 
-        await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+        await m.react('✅')
 
     } catch (e) {
-        await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
+        await m.react('❌')
         await RaplyGwe(`❌ *Gagal:* ${e.message || e}`)
     }
 }
