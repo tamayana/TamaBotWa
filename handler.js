@@ -410,7 +410,6 @@ const MEDIUM_RE = MEDIUM.map(build)
 const DOMAIN_RE = /(?:slot|toto|togel|judi|gacor|casino|maxwin|jackpot|sbo|joker|pragmatic|olympus|zeus|mahjong|bandar)[a-z0-9-]*\.(?:com|net|org|xyz|online|site|id|vip|club|top|live|lol|info|co|me|cc|pro|bar|fun|win|bet|link|shop|one|app|click|games)\b/
 const URL_RE = /(?:https?:\/\/|www\.|\b[a-z0-9-]+\.(?:com|net|org|xyz|online|site|id|vip|club|top|live|lol|info|co|me|cc|pro|bar|fun|win|bet|link|shop|one|app|click|games)\b)/
 
-
 const clean = (t) => String(t)
     .normalize('NFKC')
     .replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '')
@@ -443,7 +442,7 @@ const TEXT_KEYS = new Set(['text', 'caption', 'conversation', 'title', 'descript
 function collectText(node, out = [], depth = 0) {
     if (!node || typeof node !== 'object' || depth > 6 || node instanceof Uint8Array) return out
     for (const [key, value] of Object.entries(node)) {
-        if (key === 'contextInfo' || key === 'quotedMessage') continue // abaikan kutipan pesan orang lain
+        if (key === 'contextInfo' || key === 'quotedMessage') continue
         if (typeof value === 'string') { if (TEXT_KEYS.has(key)) out.push(value) }
         else if (Array.isArray(value)) value.forEach(v => collectText(v, out, depth + 1))
         else if (value && typeof value === 'object') collectText(value, out, depth + 1)
@@ -891,6 +890,9 @@ export default async function handler(conn, event, data) {
                     participants,
                     isAdmin,
                     isBotAdmin,
+                    isOwner: m.isOwner,
+                    isCreator: m.isCreator,
+                    isPremium: m.isPremium,
                     botJids: [conn.user?.id, conn.user?.lid, conn.user?.jid].filter(Boolean).map(norm),
                     targets,
                     isOld: !!sec && Math.floor(Date.now() / 1000) - sec > 60
