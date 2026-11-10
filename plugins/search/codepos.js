@@ -22,26 +22,36 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
     await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
 
     try {
-        const { data } = await axios.get('https://api.kyzzz.xyz/api/tools/kodepost', {
-            params: { kota: keyword, apikey: 'kyzz211554828' },
+        // TANPA APIKEY - API GRATIS
+        const { data } = await axios.get('https://kodepos.vercel.app/search', {
+            params: { q: keyword },
             timeout: 30000
         })
 
-        const list = Array.isArray(data?.result) ? data.result : []
-        if (!data?.status || !list.length) {
+        const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []
+        // Normalisasi biar formatnya sama kayak dulu
+        const normalized = list.map(v => ({
+            kodepos: v.code || v.kodepos || v.postal_code,
+            desa: v.village || v.desa || v.kelurahan || '-',
+            kecamatan: v.district || v.kecamatan || '-',
+            kota: v.regency || v.city || v.kota || v.kabupaten || '-',
+            provinsi: v.province || v.provinsi || '-'
+        })).filter(v => v.kodepos)
+
+        if (!normalized.length) {
             await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
             return RaplyGwe(`Kode pos untuk *${keyword}* tidak ditemukan.`)
         }
 
-        const totalPage = Math.ceil(list.length / perPage)
+        const totalPage = Math.ceil(normalized.length / perPage)
         if (page > totalPage) {
             await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
             return RaplyGwe(`Halaman ${page} tidak ada. Total halaman: *${totalPage}*`)
         }
 
-        const items = list.slice((page - 1) * perPage, page * perPage)
+        const items = normalized.slice((page - 1) * perPage, page * perPage)
         const title = `\`KODE POS ${keyword.toUpperCase()}\``
-        const info  = `└▢ *Halaman:* ${page}/${totalPage} ─ ${list.length} hasil`
+        const info  = `└▢ *Halaman:* ${page}/${totalPage} ─ ${normalized.length} hasil`
         const next  = page < totalPage
             ? `\n> ⁉️ Ketik: *${usedPrefix + command} ${keyword} ${page + 1}* halaman berikutnya.`
             : ''
@@ -65,7 +75,7 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
                 body: proto.Message.InteractiveMessage.Body.fromObject({
                     text: `*${item.kodepos}*`
                 }),
-                footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: `ᴘᴏᴡᴇʀᴇᴅ ʙʏ ʏᴏʀᴜᴍɪ-ᴍᴅ` }),
+                footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: `ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴛᴀᴍᴀ-ɪᴅ` }),
                 nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
                     buttons: [{
                         name: 'cta_copy',
