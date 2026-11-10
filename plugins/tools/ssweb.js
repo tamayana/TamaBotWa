@@ -1,4 +1,3 @@
-import axios from 'axios'
 import config from '../../config.js'
 
 let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
@@ -15,35 +14,38 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
 
     await m.react('🕒')
 
-    try {
-        let { data } = await axios.get('https://api.kyzzz.xyz/api/tools/ssweb', {
-            params: { url, device: 'desktop', apikey: 'kyzz211554828' },
-            timeout: 60000
-        })
+    // GRATIS TANPA APIKEY - 2 Cadangan
+    // 1. thum.io (utama) - 2. wordpress mshots (cadangan)
+    const cleanUrl = url.replace(/^https?:\/\//i, '')
+    const shot1 = `https://image.thum.io/get/width/1200/crop/800/fullpage/${url}`
+    const shot2 = `https://s0.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=1200`
 
-        let image = data?.result?.screenshot_url
-        if (!data?.status || !image) throw new Error(data?.message || data?.error || 'Screenshot tidak ditemukan.')
-
-        await conn.sendMessage(m.chat, {
-            image: { url: image },
-            caption: `✅ *Screenshot Website*`,
-            contextInfo: {
-                forwardingScore: 9,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: config.saluranId,
-                    newsletterName: config.saluranName,
-                    serverMessageId: 127
+    // Coba kirim pake thum.io dulu, kalo gagal pake mshots
+    for (const image of [shot1, shot2]) {
+        try {
+            await conn.sendMessage(m.chat, {
+                image: { url: image },
+                caption: `✅ *Screenshot Website*\n🔗 ${url}`,
+                contextInfo: {
+                    forwardingScore: 9,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: config.saluranId,
+                        newsletterName: config.saluranName,
+                        serverMessageId: 127
+                    }
                 }
-            }
-        }, { quoted: m })
-
-        await m.react('✅')
-    } catch (e) {
-        console.error('[ssweb]', e)
-        await m.react('❌')
-        await RaplyGwe(`Gagal mengambil screenshot.\n\n${e.message}`.slice(0, 600))
+            }, { quoted: m })
+            await m.react('✅')
+            return
+        } catch (e) {
+            console.error('[ssweb] gagal pake', image, e.message)
+            continue
+        }
     }
+
+    await m.react('❌')
+    await RaplyGwe(`Gagal mengambil screenshot.\n\nCoba lagi nanti, layanan screenshot lagi down.`)
 }
 
 handler.help = ['ssweb <link>']
