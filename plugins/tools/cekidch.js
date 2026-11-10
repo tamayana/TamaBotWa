@@ -25,46 +25,47 @@ let handler = async (m, { conn, text }) => {
     let status = res.state?.type || res.state || th.state?.type || "-"
     let verif = (res.verification || th.verification) == "VERIFIED" ? "Terverifikasi" : "Tidak"
 
-    let teks = `
-* *ID :* ${res.id}
-* *Nama :* ${nama}
-* *Total Pengikut :* ${foll}
-* *Status :* ${status}
-* *Verified :* ${verif}`
+    // GUA BENERIN FORMAT NYA BUNG, TADI ADA * * DOBEL!
+    let teks = `*ID :* ${res.id}\n*Nama :* ${nama}\n*Total Pengikut :* ${foll}\n*Status :* ${status}\n*Verified :* ${verif}`
 
-    let msgii = await generateWAMessageFromContent(m.chat, {
-        viewOnceMessageV2Extension: {
-            message: {
-                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-                    body: { text: teks },
-                    nativeFlowMessage: {
-                        buttons: [{
-                            name: "cta_copy",
-                            buttonParamsJson: JSON.stringify({
-                                display_text: "Copy ID Channel",
-                                id: "copy_id",
-                                copy_code: res.id
-                            })
-                        }]
-                    }
-                })
+    // Coba kirim pake tombol copy dulu, kalo gagal kirim teks biasa aja!
+    try {
+        let msgii = await generateWAMessageFromContent(m.chat, {
+            viewOnceMessageV2Extension: {
+                message: {
+                    messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                    interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                        body: { text: teks },
+                        nativeFlowMessage: {
+                            buttons: [{
+                                name: "cta_copy",
+                                buttonParamsJson: JSON.stringify({
+                                    display_text: "Copy ID Channel",
+                                    id: "copy_id",
+                                    copy_code: res.id
+                                })
+                            }]
+                        }
+                    })
+                }
             }
-        }
-    }, { userJid: conn.user.id, quoted: m })
+        }, { userJid: conn.user.id, quoted: m })
 
-    await conn.relayMessage(m.chat, msgii.message, {
-        messageId: msgii.key.id,
-        additionalNodes: [{
-            tag: "biz",
-            attrs: {},
-            content: [{
-                tag: "interactive",
-                attrs: { type: "native_flow", v: "1" },
-                content: [{ tag: "native_flow", attrs: { v: "9", name: "mixed" }, content: [] }]
+        await conn.relayMessage(m.chat, msgii.message, {
+            messageId: msgii.key.id,
+            additionalNodes: [{
+                tag: "biz",
+                attrs: {},
+                content: [{
+                    tag: "interactive",
+                    attrs: { type: "native_flow", v: "1" },
+                    content: [{ tag: "native_flow", attrs: { v: "9", name: "mixed" }, content: [] }]
+                }]
             }]
-        }]
-    })
+        })
+    } catch {
+        await m.reply(teks)
+    }
 }
 
 handler.help = ['cekidch <link>']
