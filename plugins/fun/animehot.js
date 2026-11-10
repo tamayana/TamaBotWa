@@ -1,4 +1,5 @@
-// plugins/fun/animehot.js - VERSI BUAT API FOTO LANGSUNG!
+// plugins/fun/animehot.js - VERSI FINAL, UDAH NYAMBUNG KE config.js!
+import config from '../../config.js'
 
 let handler = async (m, { conn }) => {
     try {
@@ -6,11 +7,17 @@ let handler = async (m, { conn }) => {
             text: `🔍 Lagi cariin anime cantik buat lu...`
         }, { quoted: m })
 
-        // API KEY TARO DI config.js YA! JANGAN DISINI!
-        // config.js: global.apiKeyKyzz = 'KEY_BARU_LU'
-        let res = await fetch(`https://api.kyzzz.xyz/api/image/anime?apikey=${global.apiKeyKyzz}`)
+        // AMBIL KEY DARI config.js - YANG NAMA NYA kyzzApikey!
+        let apikey = config.kyzzApikey
+        if (!apikey) throw new Error('API Key belum diisi di config.js!')
 
-        if (!res.ok) throw new Error('API nya error! Status: ' + res.status)
+        // ENDPOINT NYA PAKE anime-hot! BUKAN anime DOANG!
+        let res = await fetch(`https://api.kyzzz.xyz/api/image/anime-hot?apikey=${apikey}`)
+
+        if (!res.ok) {
+            let body = await res.text()
+            throw new Error(`API nya error! Status: ${res.status} | Pesan API: ${body.slice(0, 200)}`)
+        }
 
         // CEK DULU, DIA BALIKIN JSON ATAU FOTO?
         let contentType = res.headers.get('content-type') || ''
