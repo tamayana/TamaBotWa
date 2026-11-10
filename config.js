@@ -36,12 +36,12 @@ const config = {
   },
 
   accessDenied: {
-    owner: 'Fitur ini khusus Owner.',
-    creator: 'Fitur ini khusus Creator.',
-    premium: 'Fitur ini khusus Premium.',
+    owner: '🤫 *ACCESS DENIED!*\n\nLu bukan owner, lu member. Diem aja, nonton aja.',
+    creator: '🤫 *ACCESS DENIED!*\n\nLu bukan creator, lu member. Diem aja, nonton aja.',
+    premium: '🤫 *ACCESS DENIED!*\n\nFitur ini khusus Premium. Lu bukan Premium, diem aja, nonton aja.',
     privatePremium: 'Chat pribadi dengan bot khusus Premium. Silakan pakai bot di grup.',
     group: 'Fitur ini hanya bisa dipakai di dalam Grup.',
-    admin: 'Fitur ini khusus Admin Grup.',
+    admin: '🤫 *ACCESS DENIED!*\n\nLu bukan admin, lu member. Diem aja, nonton aja.',
     botAdmin: 'Jadikan bot sebagai Admin Grup dulu.',
   },
 };
