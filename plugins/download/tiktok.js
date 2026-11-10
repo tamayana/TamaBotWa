@@ -17,7 +17,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => 
     await m.react('⌛')
 
     try {
-        /// ─────────── [ 𝖠𝗆𝖻𝗂𝗅 𝖣𝖺𝗍𝖺 ] ────────── ///
+        /// ─────────── [ Ambil Data ] ────────── ///
         const { data } = await axios.post('https://www.tikwm.com/api/', {}, {
             headers: {
                 Accept: 'application/json, text/javascript, */*; q=0.01',
@@ -47,7 +47,17 @@ let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => 
         const comments = Number(res.comment_count || 0).toLocaleString('id-ID')
         const shares = Number(res.share_count || 0).toLocaleString('id-ID')
 
-        /// ─────────── [ 𝖬𝗈𝖽𝖾 𝖲𝗅𝗂𝖽𝖾𝗌𝗁𝗈𝗐 ] ────────── ///
+        let ctx = {
+            forwardingScore: 9,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+                newsletterJid: config.saluranId,
+                newsletterName: config.saluranName,
+                serverMessageId: 127
+            }
+        }
+
+        /// ─────────── [ Mode Slideshow ] ────────── ///
         if (isSlide) {
             const caption = `📸 *𝗧 𝗜 𝗞 𝗧 𝗢 𝗞  -  𝗗 𝗢 𝗪 𝗡 𝗟 𝗢 𝗔 𝗗 𝗘 𝗥*\n\n`
                 + `- Author: *${author}* (${username})\n`
@@ -63,17 +73,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => 
             const slides = res.images.slice(0, 10).map((url, i) => ({
                 image: { url },
                 caption: i === 0 ? caption : '',
-                ...(i === 0 && {
-                    contextInfo: {
-                        forwardingScore: 9,
-                        isForwarded: true,
-                        forwardedNewsletterMessageInfo: {
-                            newsletterJid: config.saluranId,
-                            newsletterName: config.saluranName,
-                            serverMessageId: 127
-                        }
-                    }
-                })
+                ...(i === 0 && { contextInfo: ctx })
             }))
 
             await conn.sendMessage(m.chat, { albumMessage: slides }, { quoted: m })
@@ -81,7 +81,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => 
             return
         }
 
-        /// ─────────── [ 𝖬𝗈𝖽𝖾 𝖵𝗂𝖽𝖾𝗈 ] ────────── ///
+        /// ─────────── [ Mode Video ] ────────── ///
         const caption = `🎵 *𝗧 𝗜 𝗞 𝗧 𝗢 𝗞  -  𝗗 𝗢 𝗪 𝗡 𝗟 𝗢 𝗔 𝗗 𝗘 𝗥*\n\n`
             + `- Author: *${author}* (${username})\n`
             + `- Caption: ${title}\n`
@@ -95,25 +95,32 @@ let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => 
             + `- Shares: *${shares}*`
 
         let video = null
+        let lastErr = ''
         for (const relPath of [res.hdplay, res.play, res.wmplay]) {
             if (!relPath) continue
             try {
-                const videoRes = await axios.get(`${CDN}${relPath}`, { responseType: 'arraybuffer', timeout: 180000, maxContentLength: Infinity })
+                const videoRes = await axios.get(`${CDN}${relPath}`, { responseType: 'arraybuffer', timeout: 180000, maxContentLength: 100 * 1024 * 1024 })
                 const buf = Buffer.from(videoRes.data)
                 if (buf.length > 10 * 1024) { video = buf; break }
-            } catch {}
+            } catch (e) {
+                lastErr = e.message // Simpen error terakhir biar ketahuan!
+            }
         }
-        if (!video) throw new Error('Gagal mengunduh video dari server')
+        if (!video) throw new Error(`Gagal mengunduh video dari server. ${lastErr ? `(${lastErr})` : ''}`)
 
         let needConvert = video.toString('ascii', 4, 8) !== 'ftyp'
         if (!needConvert) {
             const probeFile = path.join(os.tmpdir(), `tt_probe_${Date.now()}.mp4`)
-            fs.writeFileSync(probeFile, video)
-            const probe = spawnSync(getFfmpegPath(), ['-hide_banner', '-i', probeFile], { encoding: 'utf8' })
-            fs.rmSync(probeFile, { force: true })
-            needConvert = /Video: (hevc|h265|vp9|av1)/i.test(probe.stderr || '')
+            try {
+                fs.writeFileSync(probeFile, video)
+                const probe = spawnSync(getFfmpegPath(), ['-hide_banner', '-i', probeFile], { encoding: 'utf8' })
+                needConvert = /Video: (hevc|h265|vp9|av1)/i.test(probe.stderr || '')
+            } finally {
+                fs.rmSync(probeFile, { force: true }) // Pasti kehapus walau error!
+            }
         }
         if (needConvert) {
+            await RaplyGwe('⏳ Video format baru terdeteksi, sedang convert ke H264 biar bisa diputer di WhatsApp...')
             video = await ffmpeg(video, ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '28', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart'], 'mp4', 'mp4')
         }
 
@@ -123,37 +130,22 @@ let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => 
                 mimetype: 'video/mp4', 
                 fileName: `tiktok_${Date.now()}.mp4`, 
                 caption,
-                contextInfo: {
-                    forwardingScore: 9,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: config.saluranId,
-                        newsletterName: config.saluranName,
-                        serverMessageId: 127
-                    }
-                }
+                contextInfo: ctx
             }, { quoted: m })
         } else {
             await conn.sendMessage(m.chat, { 
                 video, 
                 mimetype: 'video/mp4', 
                 caption,
-                contextInfo: {
-                    forwardingScore: 9,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: config.saluranId,
-                        newsletterName: config.saluranName,
-                        serverMessageId: 127
-                    }
-                }
+                contextInfo: ctx
             }, { quoted: m })
         }
 
         await m.react('✅')
     } catch (e) {
         await m.react('❌')
-        await RaplyGwe(`Terjadi kesalahan saat memproses TikTok: ${e.message}`)
+        console.log('TIKTOK ERROR:', e.message)
+        await RaplyGwe(`❌ Terjadi kesalahan saat memproses TikTok: ${e.message}`)
     }
 }
 
