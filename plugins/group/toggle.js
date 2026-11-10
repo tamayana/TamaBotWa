@@ -3,7 +3,10 @@ import { getGroupSettings, setGroupSetting } from '../../lib/database.js'
 const FEATURES = {
     detect: ['detect', 'Detect'],
     adminonly: ['adminOnly', 'Admin Only'],
-    antidelete: ['delete', 'Anti Delete']
+    antidelete: ['delete', 'Anti Delete'],
+    welcome: ['welcome', 'Welcome'], // <-- INI YANG HILANG TADI BUNG!
+    goodbye: ['welcome', 'Welcome'], // Biar .goodbye on juga bisa, soalnya 1 setting sama welcome!
+    left: ['welcome', 'Welcome']
 }
 
 let handler = async (m, { args, command, usedPrefix, RaplyGwe }) => {
@@ -30,9 +33,9 @@ let handler = async (m, { args, command, usedPrefix, RaplyGwe }) => {
     }
 }
 
-handler.help = ['detect <on/off>', 'adminonly <on/off>', 'antidelete <on/off>']
+handler.help = ['detect <on/off>', 'adminonly <on/off>', 'antidelete <on/off>', 'welcome <on/off>']
 handler.tags = ['group']
-handler.command = /^(detect|adminonly|antidelete)$/i
+handler.command = /^(detect|adminonly|antidelete|welcome|goodbye|left)$/i
 handler.group = true
 handler.admin = true
 
