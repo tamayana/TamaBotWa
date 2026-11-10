@@ -14,11 +14,15 @@ async function upPone(buffer, filename) {
                 origin: 'https://pone.rs',
                 referer: 'https://pone.rs/'
             },
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity
+            timeout: 30000,
+            maxBodyLength: 10 * 1024 * 1024,
+            maxContentLength: 10 * 1024 * 1024
         })
-        return res.data?.files?.[0]?.url?.replaceAll('\\/', '/') || null
-    } catch {
+        const url = res.data?.files?.[0]?.url?.replaceAll('\\/', '/') || null
+        if (!url || !/^https?:\/\//.test(url)) return null
+        return url
+    } catch (e) {
+        console.error('[jadihitam upload]', e.message)
         return null
     }
 }
@@ -27,37 +31,47 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     let q = m.quoted ? m.quoted : m
     let mime = (q.msg || q).mimetype || ''
     
-    if (!/image/.test(mime)) return m.reply(`Balas gambar dengan perintah *${usedPrefix + command}*`)
+    if (!/image\/(jpe?g|png|webp)/.test(mime)) return m.reply(`Balas gambar dengan perintah *${usedPrefix + command}*`)
 
-    m.reply('Sedang memproses gambar, mohon tunggu...')
+    await m.reply('Sedang memproses gambar, mohon tunggu...').catch(()=>{})
 
     try {
         let buffer = await q.download()
-        if (!buffer) return m.reply('Gagal mengunduh gambar.')
+        if (!buffer || !buffer.length) return m.reply('Gagal mengunduh gambar.')
+
+        if (buffer.length > 5 * 1024 * 1024) return m.reply('Gambar kegedean anjing! Max 5MB aja!')
 
         let url = await upPone(buffer, `img_${Date.now()}.jpg`)
-        if (!url) return m.reply('Gagal mengunggah gambar ke server.')
+        if (!url) return m.reply('Gagal mengunggah gambar ke server, coba lagi anjing! Server upload lagi lemot.')
 
         let api = `https://api.ikyyxd.my.id/edit/jadihitam?url=${encodeURIComponent(url)}`
-        let res = await axios.get(api, { responseType: 'arraybuffer' }).catch(() => null)
+        let res = await axios.get(api, { 
+            responseType: 'arraybuffer',
+            timeout: 60000,
+            maxContentLength: 10 * 1024 * 1024
+        }).catch(() => null)
         
-        if (!res) return m.reply('Gagal menghubungi API. Pastikan server API sedang online.')
+        if (!res || !res.data) return m.reply('Gagal menghubungi API. Server API lagi offline, coba lagi nanti!')
 
         let ct = res.headers['content-type'] || ''
         
         if (ct.includes('image')) {
-            await conn.sendMessage(m.chat, { image: Buffer.from(res.data), caption: '✅ Berhasil diproses!' }, { quoted: m })
+            if (Buffer.from(res.data).length < 1000) return m.reply('Hasil dari API rusak / kosong, coba lagi!')
+            await conn.sendMessage(m.chat, { image: Buffer.from(res.data), caption: '✅ Berhasil diproses!\n└╼ Powered By : TAMA-ID' }, { quoted: m })
         } else {
-            let json = JSON.parse(Buffer.from(res.data).toString())
+            let text = Buffer.from(res.data).toString()
+            let json
+            try { json = JSON.parse(text) } catch { return m.reply('API ngasih respon aneh, coba lagi!') }
             let out = json.result || json.url || json.data?.url || json.image || json.data?.image || null
             
-            if (!out) return m.reply('Gagal mendapatkan link hasil dari API.')
+            if (!out || !/^https?:\/\//.test(out)) return m.reply('Gagal mendapatkan link hasil dari API.')
             
-            await conn.sendMessage(m.chat, { image: { url: out }, caption: '✅ Berhasil diproses!' }, { quoted: m })
+            await conn.sendMessage(m.chat, { image: { url: out }, caption: '✅ Berhasil diproses!\n└╼ Powered By : TAMA-ID' }, { quoted: m })
         }
 
     } catch (e) {
-        m.reply('Terjadi kesalahan saat memproses gambar.')
+        console.error('[jadihitam TAMA-ID]', e.message)
+        m.reply('Terjadi kesalahan saat memproses gambar, coba lagi anjing!')
     }
 }
 
