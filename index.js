@@ -116,14 +116,14 @@ const showBanner = async () => {
         : vpsInfo.status === 'Ilegal' ? palette.err(vpsInfo.status) : palette.warn(vpsInfo.status)
 
     say(palette.accent(`
-    ██╗   ██╗ ██████╗ ██████╗ ██╗   ██╗███╗   ███╗██╗
-    ╚██╗ ██╔╝██╔═══██╗██╔══██╗██║   ██║████╗ ████║██║
-     ╚████╔╝ ██║   ██║██████╔╝██║   ██║██╔████╔██║██║
-      ╚██╔╝  ██║   ██║██╔══██╗██║   ██║██║╚██╔╝██║██║
-       ██║   ╚██████╔╝██║  ██║╚██████╔╝██║ ╚═╝ ██║██║
-       ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝
-    `))
-    say(`${palette.muted('›')} ${chalk.bold(palette.text('TAMABOTWA MULTI-DEVICE BOT'))} ${palette.muted('v1.0')}\n`)
+████████╗ █████╗ ███╗   ███╗ █████╗ 
+╚══██╔══╝██╔══██╗████╗ ████║██╔══██╗
+   ██║   ███████║██╔████╔██║███████║
+   ██║   ██╔══██║██║╚██╔╝██║██╔══██║
+   ██║   ██║  ██║██║ ╚═╝ ██║██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝
+`))
+say(`${palette.muted('›')} ${chalk.bold(palette.text('TAMABOTWA MULTI-DEVICE BOT'))} ${palette.muted('v1.0')}\n`)
 
     const rows = [
         ['Node Version', process.version],
