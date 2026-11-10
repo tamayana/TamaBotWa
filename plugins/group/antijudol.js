@@ -1,23 +1,78 @@
-import { getGroupSettings, setGroupSettings } from '../../lib/database.js'
+import config from '../../config.js'
+import { getGroupSettings, setGroupSetting } from '../../lib/database.js'
 
-let handler = async (m, { args, usedPrefix, isBotAdmin, RaplyGwe }) => {
-    const reply = RaplyGwe || m.reply
-    const mode = (args[0] || '').toLowerCase()
-    const cfg = getGroupSettings(m.chat)
-    const label = cfg.antijudol ? (cfg.antijudolKick ? 'ON (hapus + kick)' : 'ON (hapus)') : 'OFF'
-    if (!['on', 'off', 'kick'].includes(mode)) {
-        return reply(`Status Anti Judol: *${label}*\n\nContoh:\n${usedPrefix}antijudol on\n${usedPrefix}antijudol kick\n${usedPrefix}antijudol off`)
+const JUDOL_REGEX = /(JNBET|WDBOS|SLOT|GACOR|TOGEL|TOTO|MAXWIN|DEPOSIT|WD|SCATTER|MAHJONG|BANDAR|JUDI|BET|BONUS|PROMO|RTP|POLA|ZEUS|OLYMPUS)/i
+
+let warnDB = {}
+
+let handler = async (m, { conn, args, command, usedPrefix, RaplyGwe, isAdmin, isBotAdmin, isOld }) => {
+    if (command) {
+        if (!m.isGroup) return RaplyGwe(config.accessDenied.group)
+        if (!isAdmin && !m.isOwner) return RaplyGwe(config.accessDenied.admin)
+        const p = usedPrefix || '.'
+        const mode = (args[0] || '').toLowerCase()
+        try {
+            const current = getGroupSettings(m.chat).antijudol
+            if (!['on', 'off', 'kick'].includes(mode)) {
+                return RaplyGwe(`🎰 Status Anti Judol: *${current ? 'ON ✅' : 'OFF ❌'}*\n\n*Cara pakai:*\n${p}antijudol on\n${p}antijudol kick\n${p}antijudol off`)
+            }
+            const enable = mode !== 'off'
+            const kickMode = mode === 'kick'
+            setGroupSetting(m.chat, 'antijudol', enable)
+            setGroupSetting(m.chat, 'antijudolKick', kickMode)
+            let text = `✅ Anti Judol berhasil di *${enable ? 'AKTIFKAN' : 'MATIKAN'}*${kickMode ? ' (mode hapus + kick)' : ''}.`
+            if (enable && !isBotAdmin) text += '\n\n⚠️ Bot belum jadi Admin grup, jadikan Admin supaya bisa menghapus pesan.'
+            return RaplyGwe(text)
+        } catch (e) {
+            return RaplyGwe(`❌ Gagal ngatur Anti Judol: ${e.message}`)
+        }
     }
-    setGroupSettings(m.chat, 'antijudol', mode !== 'off')
-    setGroupSettings(m.chat, 'antijudolKick', mode === 'kick')
-    let text = mode === 'off' ? 'Anti Judol berhasil dimatikan.' : `Anti Judol berhasil diaktifkan${mode === 'kick' ? ' (mode hapus + kick)' : ''}.`
-    if (mode !== 'off' && !isBotAdmin) text += '\n\n⚠️ Bot belum jadi Admin grup, jadikan Admin supaya bisa menghapus pesan.'
-    return reply(text)
+
+    // === AUTO-DETECT JUDOL ===
+    if (!m.isGroup || m.fromMe || m.isOwner || isOld) return
+    if (!getGroupSettings(m.chat).antijudol) return
+    if (!JUDOL_REGEX.test(m.text || '')) return
+    if (isAdmin || !isBotAdmin) return
+
+    const sender = m.sender
+    const chatId = m.chat
+    try {
+        await conn.sendMessage(chatId, { delete: m.key })
+
+        if (getGroupSettings(m.chat).antijudolKick) {
+            await conn.sendMessage(chatId, { text: `🚨 *KENA KICK! GARA-GARA JUDOL!* 🚨\n\n@${sender.split('@')[0]} ketangkep kirim JUDOL!\n\n❌ Pesan dihapus\n❌ LANGSUNG DIKICK!`, mentions: [sender] })
+            await conn.groupParticipantsUpdate(chatId, [sender], 'remove')
+            return
+        }
+
+        if (!warnDB[chatId]) warnDB[chatId] = {}
+        if (!warnDB[chatId][sender]) warnDB[chatId][sender] = 0
+        warnDB[chatId][sender]++
+        const warnCount = warnDB[chatId][sender]
+
+        if (warnCount >= 3) {
+            await conn.sendMessage(chatId, { text: `🚨 *KENA KICK! GARA-GARA JUDOL!* 🚨\n\n@${sender.split('@')[0]} udah 3x kirim judol!\n\n❌ Pesan dihapus\n❌ Warn 3/3\n❌ LANGSUNG DIKICK!`, mentions: [sender] })
+            await conn.groupParticipantsUpdate(chatId, [sender], 'remove')
+            delete warnDB[chatId][sender]
+            return
+        }
+
+        const marahList = [
+            `🚨 *WOY TOLOL! KETANGKEP JUDOL!* 🚨\n\n@${sender.split('@')[0]} Otak lu di mana?! Ngapain kirim JUDOL di sini?!\n\n❌ Pesan sampah lu udah gua hapus!\n⚠️ Warn lu: *${warnCount}/3*`,
+            `😡 *EH BABI!* 😡\n\n@${sender.split('@')[0]} lu kira ini grup bandar?! Hah?!\n\n❌ Pesan lu gua hapus!\n⚠️ Warn: *${warnCount}/3*`,
+            `🤬 *WOY ANJING!* 🤬\n\n@${sender.split('@')[0]} STOP KIRIM JUDOL! LU PIKIR GRUP INI TEMPAT JUALAN TOGEL?!\n\n❌ Dihapus!\n⚠️ Warn: *${warnCount}/3*`
+        ]
+        const marahText = marahList[Math.floor(Math.random() * marahList.length)]
+        await conn.sendMessage(chatId, { text: marahText, mentions: [sender] })
+        await conn.sendMessage(chatId, { react: { text: '😡', key: m.key } })
+    } catch (e) {
+        console.log('ANTIJUDOL EVENT ERROR:', e.message)
+    }
 }
 
 handler.help = ['antijudol <on/off/kick>']
 handler.tags = ['group']
 handler.command = /^(antijudol)$/i
-handler.group = true
-handler.admin = true
+handler.customPrefix = JUDOL_REGEX
+
 export default handler
