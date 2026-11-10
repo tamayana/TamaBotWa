@@ -464,8 +464,25 @@ async function antiJudol(conn, m, getContext) {
     if (isAdmin || !isBotAdmin) return false
     if (!(await removeMessage(conn, m))) return false
 
-    const kicked = cfg.antijudolKick ? await kickSender(conn, m, metadata) : false
-    await notify(conn, m, 'judol', `*Anti Judol*\n\n@${m.sender.split('@')[0]} terdeteksi mengirim promosi judi online, pesan dihapus${kicked ? ' dan pengirim dikeluarkan' : ''}.`)
+        const kicked = cfg.antijudolKick ? await kickSender(conn, m, metadata) : false
+    if (kicked) {
+        await conn.sendMessage(m.chat, { text: `🚨 *KENA KICK!* 🚨\n\n@${m.sender.split('@')[0]} udah kebanyakan kirim JUDOL!\n\n❌ Pesan dihapus\n❌ LANGSUNG DIKICK!`, mentions: [m.sender] })
+        return true
+    }
+    if (!global.antijudolWarn) global.antijudolWarn = {}
+    if (!global.antijudolWarn[m.chat]) global.antijudolWarn[m.chat] = {}
+    if (!global.antijudolWarn[m.chat][m.sender]) global.antijudolWarn[m.chat][m.sender] = 0
+    global.antijudolWarn[m.chat][m.sender]++
+    const warnCount = global.antijudolWarn[m.chat][m.sender]
+    const marahList = [
+        `🚨 *WOY TOLOL! KETANGKEP JUDOL!* 🚨\n\n@${m.sender.split('@')[0]} Otak lu di mana?! Ngapain kirim JUDOL di sini?!\n\n❌ Pesan sampah lu udah gua hapus!\n⚠️ Warn lu: *${warnCount}/3*`,
+        `😡 *EH BABI!* 😡\n\n@${m.sender.split('@')[0]} lu kira ini grup bandar?! Hah?!\n\n❌ Pesan lu gua hapus!\n⚠️ Warn: *${warnCount}/3*`,
+        `🤬 *WOY ANJING!* 🤬\n\n@${m.sender.split('@')[0]} STOP KIRIM JUDOL! LU PIKIR GRUP INI TEMPAT JUALAN TOGEL?!\n\n❌ Dihapus!\n⚠️ Warn: *${warnCount}/3*`,
+        `🖕 *WOY SAMPAH!* 🖕\n\n@${m.sender.split('@')[0]} lu jualan judol di sini? Lu mau gua laporin ke polisi?!\n\n❌ Pesan lu udah gua hapus!\n⚠️ Warn: *${warnCount}/3*`
+    ]
+    const marah = marahList[Math.floor(Math.random() * marahList.length)]
+    await conn.sendMessage(m.chat, { text: marah, mentions: [m.sender] })
+    await conn.sendMessage(m.chat, { react: { text: '😡', key: m.key } })
     return true
 }
 
