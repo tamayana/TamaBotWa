@@ -11,16 +11,23 @@ let handler = async (m, { conn, usedPrefix, command, RaplyGwe }) => {
         return RaplyGwe('Stiker animasi belum didukung, balas stiker biasa (non-animasi).')
     }
 
-    await m.react('🕒')
+    await m.react('🕒').catch(()=>{})
     try {
         const buffer = await q.download()
-        if (!buffer) throw new Error('Gagal mengunduh stiker')
+        if (!buffer || !buffer.length) throw new Error('Gagal mengunduh stiker')
+
+        // PENGAMAN BARU: Max 5MB!
+        if (buffer.length > 5 * 1024 * 1024) return RaplyGwe('Stiker kegedean anjing! Max 5MB aja!')
+
         const png = await ffmpeg(buffer, ['-frames:v', '1'], 'webp', 'png')
-        await conn.sendMessage(m.chat, { image: png, caption: '✅ Berhasil diubah ke gambar.' }, { quoted: m })
-        await m.react('✅')
+        if (!png || !png.length) throw new Error('Gagal convert stiker')
+
+        await conn.sendMessage(m.chat, { image: png, caption: '✅ Berhasil diubah ke gambar.\n└╼ Powered By : TAMA-ID' }, { quoted: m })
+        await m.react('✅').catch(()=>{})
     } catch (e) {
-        await m.react('❌')
-        await RaplyGwe('Gagal mengubah stiker ke gambar.')
+        console.error('[toimg TAMA-ID]', e.message)
+        await m.react('❌').catch(()=>{})
+        await RaplyGwe('Gagal mengubah stiker ke gambar, coba lagi anjing!')
     }
 }
 
