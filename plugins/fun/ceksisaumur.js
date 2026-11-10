@@ -22,7 +22,7 @@ let handler = async (m, { conn }) => {
     let tag = `@${mentioned.split('@')[0]}`
     let txt = mentioned === m.sender
         ? `Hai ${tag}\n\nSisa umur kamu *${tahun} Tahun ${bulan} Bulan ${hari} Hari*\n\`\`\`${desc}\`\`\`\n\n_Man makan man haa makan lah man🤝_`
-        : `Kamu ingin ngecek sisa umur ${tag} yak?\n\nSisa umur dia sebesar *${tahun} Tahun ${bulan} Bulan ${hari} Hari*\n\`\`\`${desc}\`\`\`\n\n_Cuma buat lucu-lucuan ya, jangan baper! 😂_`
+        : `Kamu ingin ngecek sisa umur ${tag} yak?\n\nSisa umur dia sebesar *${tahun} Tahun ${bulan} Bulan ${hari} Hari*\n\`\`\`${desc}\`\`\`\n\n_Man makan man haa makan lah man🤝_`
 
     await conn.sendMessage(m.chat, { text: txt, mentions: [mentioned] }, { quoted: m })
 }
