@@ -12,20 +12,25 @@ let handler = async (m, { conn, usedPrefix, command, RaplyGwe }) => {
         return RaplyGwe('Durasi video maksimal 10 detik.')
     }
 
-    await m.react('🕒')
+    await m.react('🕒').catch(()=>{})
     try {
         const buffer = await q.download()
-        if (!buffer) throw new Error('Gagal mengunduh media')
+        if (!buffer || !buffer.length) throw new Error('Gagal mengunduh media')
+
+        // PENGAMAN BARU: Max 10MB buat gambar, 15MB buat video!
+        const maxSize = /video/.test(mime) ? 15 * 1024 * 1024 : 10 * 1024 * 1024
+        if (buffer.length > maxSize) return RaplyGwe(`File kegedean anjing! Max ${/video/.test(mime) ? '15MB' : '10MB'} aja buat stiker!`)
 
         await conn.sendSticker(m.chat, buffer, m, {
             mime,
-            packname: config.botName,
-            author: m.pushName || config.ownerName
+            packname: global.stickpack || config.botName || 'TAMA-ID',
+            author: global.stickauth || m.pushName || config.ownerName || 'TAMA-ID'
         })
-        await m.react('✅')
+        await m.react('✅').catch(()=>{})
     } catch (e) {
-        await m.react('❌')
-        await RaplyGwe('Gagal membuat stiker. Pastikan media valid dan ffmpeg tersedia.')
+        console.error('[sticker TAMA-ID]', e.message)
+        await m.react('❌').catch(()=>{})
+        await RaplyGwe('Gagal membuat stiker, coba lagi anjing! Pastikan media valid dan ffmpeg tersedia.')
     }
 }
 
