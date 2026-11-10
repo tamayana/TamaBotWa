@@ -2,8 +2,6 @@ import axios from 'axios'
 import FormData from 'form-data'
 import { proto, generateWAMessageFromContent } from '@adiwajshing/baileys'
 
-const API = 'https://pone.rs/upload.php'
-
 function getExt(mime = '') {
     if (mime.includes('image/jpeg')) return '.jpg'
     if (mime.includes('image/png')) return '.png'
@@ -20,11 +18,10 @@ function getExt(mime = '') {
 }
 
 async function upPone(buffer, filename) {
-    const form = new FormData()
-    form.append('files[]', buffer, { filename })
-
     try {
-        const res = await axios.post(API, form, {
+        const form = new FormData()
+        form.append('files[]', buffer, { filename })
+        const res = await axios.post('https://pone.rs/upload.php', form, {
             headers: {
                 ...form.getHeaders(),
                 'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36',
@@ -34,21 +31,34 @@ async function upPone(buffer, filename) {
             },
             maxBodyLength: Infinity,
             maxContentLength: Infinity,
-            validateStatus: () => true
+            validateStatus: () => true,
+            timeout: 60000
         })
-
-        const data = res.data
-        const url = data?.files?.[0]?.url?.replaceAll('\\/', '/') || null
+        const url = res.data?.files?.[0]?.url?.replaceAll('\\/', '/') || null
         return url
-    } catch (err) {
-        return null
-    }
+    } catch { return null }
+}
+
+async function upCatbox(buffer, filename) {
+    try {
+        const form = new FormData()
+        form.append('reqtype', 'fileupload')
+        form.append('fileToUpload', buffer, { filename })
+        const res = await axios.post('https://catbox.moe/user/api.php', form, {
+            headers: { ...form.getHeaders() },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+            validateStatus: () => true,
+            timeout: 60000
+        })
+        const url = typeof res.data === 'string' && res.data.startsWith('https://') ? res.data.trim() : null
+        return url
+    } catch { return null }
 }
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     let q = m.quoted ? m.quoted : m
     let mime = (q.msg || q).mimetype || ''
-
     if (!mime) return m.reply(`Reply media atau kirim media dengan caption *${usedPrefix + command}*`)
 
     m.reply('Sedang mengunggah, tunggu sebentar...')
@@ -59,44 +69,57 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     let ext = getExt(mime)
     let filename = Math.random().toString(36).substring(2, 8) + ext
 
+    // Coba pone dulu, kalo gagal pindah ke catbox
     let url = await upPone(buffer, filename)
-    if (!url) return m.reply('Gagal mengunggah ke server.')
+    let provider = 'pone.rs'
+    if (!url) {
+        url = await upCatbox(buffer, filename)
+        provider = 'catbox.moe'
+    }
+    if (!url) return m.reply('Gagal mengunggah ke server. Coba lagi nanti, server upload lagi down.')
 
-    let teks = '```Berhasil diunggah!```\n*URL:* ${url}'
+    // INI YANG GUA BENERIN BUNG! TADI PAKE ' ' JADI ${url} GAK KE BACA!
+    // SEKARANG PAKE ` ` BIAR URL NYA MUNCUL!
+    let teks = `Berhasil diunggah!\n*URL:* ${url}\n*Server:* ${provider}`
 
-    let msgii = await generateWAMessageFromContent(m.chat, {
-        viewOnceMessageV2Extension: {
-            message: {
-                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-                    body: { text: teks },
-                    nativeFlowMessage: {
-                        buttons: [{
-                            name: 'cta_copy',
-                            buttonParamsJson: JSON.stringify({
-                                display_text: 'Copy',
-                                id: 'copy_url',
-                                copy_code: url
-                            })
-                        }]
-                    }
-                })
+    try {
+        let msgii = await generateWAMessageFromContent(m.chat, {
+            viewOnceMessageV2Extension: {
+                message: {
+                    messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                    interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                        body: { text: teks },
+                        nativeFlowMessage: {
+                            buttons: [{
+                                name: 'cta_copy',
+                                buttonParamsJson: JSON.stringify({
+                                    display_text: 'Copy',
+                                    id: 'copy_url',
+                                    copy_code: url
+                                })
+                            }]
+                        }
+                    })
+                }
             }
-        }
-    }, { userJid: conn.user.id, quoted: m })
+        }, { userJid: conn.user.id, quoted: m })
 
-    await conn.relayMessage(m.chat, msgii.message, {
-        messageId: msgii.key.id,
-        additionalNodes: [{
-            tag: 'biz',
-            attrs: {},
-            content: [{
-                tag: 'interactive',
-                attrs: { type: 'native_flow', v: '1' },
-                content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' }, content: [] }]
+        await conn.relayMessage(m.chat, msgii.message, {
+            messageId: msgii.key.id,
+            additionalNodes: [{
+                tag: 'biz',
+                attrs: {},
+                content: [{
+                    tag: 'interactive',
+                    attrs: { type: 'native_flow', v: '1' },
+                    content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' }, content: [] }]
+                }]
             }]
-        }]
-    })
+        })
+    } catch {
+        // Kalo tombol copy gagal di WA baru, kirim teks biasa aja biar tetep jalan
+        await m.reply(teks)
+    }
 }
 
 handler.help = ['tourl']
