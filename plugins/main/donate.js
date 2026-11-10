@@ -46,8 +46,8 @@ Setiap donasi yang masuk akan dikelola secara transparan. Jika Anda telah menyel
                                     name: 'cta_url',
                                     buttonParamsJson: JSON.stringify({
                                         display_text: 'Support kami',
-                                        url: 'https://www.tiktok.com/@mctama',
-                                        merchant_url: 'https://www.tiktok.com/@mctama'
+                                        url: 'https://tamayana.github.io/TamaStore/',
+                                        merchant_url: 'https://tamayana.github.io/TamaStore/'
                                     })
                                 }
                             ]
