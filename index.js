@@ -146,6 +146,7 @@ const store = { bind: () => {} }
 let pluginsLoaded = false
 
 async function connectToWhatsApp() {
+    await showBanner()
     const { state, saveCreds } = await useMultiFileAuthState('./session')
     
     let version
@@ -223,7 +224,7 @@ async function connectToWhatsApp() {
                 pluginsLoaded = true
             }
 
-                        console.clear()
+            console.clear()
             await showBanner()
 
             say(`\n${makeTag('BOT', true, palette.ok)} ${cWhite.bold('BOT ONLINE')}`)
