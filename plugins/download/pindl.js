@@ -2,45 +2,49 @@ import axios from 'axios'
 import config from '../../config.js'
 
 async function pindl(url) {
-    try {
-        let { data } = await axios.get(url, {
-            headers: {
-                'User-Agent': "Mozilla/5.0 (Linux; Android 12; SAMSUNG SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/17.0 Chrome/96.0.4664.104 Mobile Safari/537.36",
-                'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
-            }
-        })
+    let { data } = await axios.get(url, {
+        headers: {
+            'User-Agent': "Mozilla/5.0 (Linux; Android 12; SAMSUNG SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/17.0 Chrome/96.0.4664.104 Mobile Safari/537.36",
+            'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+        },
+        timeout: 20000,
+        maxRedirects: 5
+    })
 
-        let matchLeaf = data.match(/<script[^>]*data-test-id="leaf-snippet"[^>]*>([\s\S]*?)<\/script>/i)
-        let matchVideo = data.match(/<script[^>]*data-test-id="video-snippet"[^>]*>([\s\S]*?)<\/script>/i)
+    let matchLeaf = data.match(/<script[^>]*data-test-id="leaf-snippet"[^>]*>([\s\S]*?)<\/script>/i)
+    let matchVideo = data.match(/<script[^>]*data-test-id="video-snippet"[^>]*>([\s\S]*?)<\/script>/i)
 
-        if (!matchLeaf) throw new Error('Data gambar tidak ditemukan.')
+    if (!matchLeaf) throw new Error('Data gambar tidak ditemukan. Link mungkin private / sudah dihapus.')
 
-        let info = JSON.parse(matchLeaf[1])
-        let videoInfo = matchVideo ? JSON.parse(matchVideo[1]) : null
+    let info = JSON.parse(matchLeaf[1])
+    let videoInfo = matchVideo ? JSON.parse(matchVideo[1]) : null
 
-        return {
-            status: true,
-            isVideo: !!videoInfo,
-            image: info.image,
-            video: videoInfo ? videoInfo.contentUrl : ''
-        }
-    } catch (e) {
-        return { status: false, mess: e.message || 'Gagal mengunduh media.' }
+    // Upgrade kualitas gambar Pinterest! 736x -> original!
+    // Pinterest biasanya ngasih URL 736x, kita ubah jadi original!
+    let image = info.image || ''
+    if (image) {
+        image = image.replace(/\/736x\//, '/originals/').replace(/\/474x\//, '/originals/').replace(/\/236x\//, '/originals/')
+    }
+
+    return {
+        isVideo: !!videoInfo,
+        image,
+        video: videoInfo ? videoInfo.contentUrl : ''
     }
 }
 
 let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => {
-    let url = text || args[0]
+    let url = (text || args[0] || '').trim()
 
     if (!url || (!url.includes('pinterest.com') && !url.includes('pin.it'))) {
         return RaplyGwe(`Kirimkan link Pinterest!\nContoh: *${usedPrefix + command}* https://pin.it/xxx`)
     }
 
-    await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+    await m.react('⏳')
 
     try {
-        let res = await pindl(url.trim())
-        if (!res.status) throw new Error(res.mess)
+        let res = await pindl(url)
+        if (!res.image && !res.video) throw new Error('Media tidak ditemukan.')
 
         let ctx = {
             forwardingScore: 9,
@@ -52,23 +56,26 @@ let handler = async (m, { conn, text, args, usedPrefix, command, RaplyGwe }) => 
             }
         }
 
-        if (res.isVideo) {
+        if (res.isVideo && res.video) {
             await conn.sendMessage(m.chat, { 
                 video: { url: res.video }, 
+                caption: '✅ *PINTEREST DOWNLOADER*',
                 contextInfo: ctx 
             }, { quoted: m })
         } else {
             await conn.sendMessage(m.chat, { 
-                image: { url: res.image }, 
+                image: { url: res.image },
+                caption: '✅ *PINTEREST DOWNLOADER*',
                 contextInfo: ctx 
             }, { quoted: m })
         }
 
-        await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+        await m.react('✅')
 
     } catch (e) {
-        await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-        await RaplyGwe(`❌ *Gagal:* ${e.message}`)
+        await m.react('❌')
+        console.log('PINDL ERROR:', e.message)
+        await RaplyGwe(`❌ *Gagal:* ${e.message}\n\nCoba pastikan link nya public & bukan pin private!`)
     }
 }
 
