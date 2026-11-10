@@ -10,7 +10,8 @@ import makeWASocket, {
     DisconnectReason,
     jidDecode,
     makeCacheableSignalKeyStore,
-    fetchLatestBaileysVersion
+    fetchLatestBaileysVersion,
+    downloadContentFromMessage
 } from '@adiwajshing/baileys'
 
 import { smsg } from './lib/myfunc.js'
@@ -20,6 +21,9 @@ import handler, { initPlugins } from './handler.js'
 import { attachHelpers } from './lib/sock.js'
 
 restoreBotMode()
+
+// === PENYIMPANAN FOTO SEKALI LIAT - BIAR BISA .tourl WALAU UDAH DIBUKA! ===
+global.viewOnceCache = global.viewOnceCache || new Map()
 
 const usePairingCode = true
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -198,6 +202,29 @@ async function connectToWhatsApp() {
             try {
                 if (!mek?.message || mek.key.remoteJid === 'status@broadcast') continue
                 if (mek.key.fromMe && mek.key.id?.startsWith('BAE5') && mek.key.id.length === 16) continue
+
+                // === SIMPEN FOTO SEKALI LIAT PAS BARU DATENG! (KAYAK BOT VINN!) ===
+                try {
+                    let msgContent = mek.message || {}
+                    let inner = msgContent.viewOnceMessageV2?.message || msgContent.viewOnceMessage?.message || msgContent.ephemeralMessage?.message?.viewOnceMessageV2?.message || msgContent.ephemeralMessage?.message?.viewOnceMessage?.message || null
+                    if (inner) {
+                        let type = Object.keys(inner)[0]
+                        let content = inner[type]
+                        if (content?.mediaKey) {
+                            let mediaType = type.includes('image') ? 'image' : type.includes('video') ? 'video' : 'image'
+                            let stream = await downloadContentFromMessage(content, mediaType)
+                            let chunks = []
+                            for await (let c of stream) chunks.push(c)
+                            let buf = Buffer.concat(chunks)
+                            global.viewOnceCache.set(mek.key.id, {
+                                buffer: buf,
+                                mimetype: content.mimetype || (mediaType === 'image' ? 'image/jpeg' : 'video/mp4')
+                            })
+                            console.log(`✅ ViewOnce tersimpan: ${mek.key.id} | ${buf.length} bytes`)
+                            setTimeout(() => global.viewOnceCache.delete(mek.key.id), 60 * 60 * 1000)
+                        }
+                    }
+                } catch (e) { console.log('Gagal simpan viewOnce:', e.message) }
 
                 const m = smsg(sock, mek, store)
                 if (m) await handler(sock, 'message', m)
