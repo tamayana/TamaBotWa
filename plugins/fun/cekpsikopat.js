@@ -1,7 +1,15 @@
 let handler = async (m, { conn }) => {
     const mentionedJid = m.mentionedJid || m.message?.extendedTextMessage?.contextInfo?.mentionedJid || []
     const mentioned = mentionedJid[0] || m.sender
-    const percent = Math.floor(Math.random() * 101)
+
+    // SAMA KAYAK cekgabut: Hasil konsisten per user per hari!
+    let today = new Date().toISOString().slice(0, 10)
+    let seedStr = mentioned + today + 'psikopat'
+    let hash = 0
+    for (let i = 0; i < seedStr.length; i++) {
+        hash = ((hash << 5) - hash + seedStr.charCodeAt(i)) | 0
+    }
+    const percent = Math.abs(hash) % 101
                         
     let desc = ''
     if (percent >= 90) {
@@ -17,8 +25,8 @@ let handler = async (m, { conn }) => {
     }
     
     let txt = mentioned === m.sender 
-        ? `Hai @${mentioned.split('@')[0]}\n\nTingkat kepsikopatan kamu *${percent}%*\n\`\`\`${desc}\`\`\`` 
-        : `Kamu ingin ngecek tingkat kepsikopatan @${mentioned.split('@')[0]} yak?\n\nTingkat kepsikopatan dia sebesar *${percent}%*\n\`\`\`${desc}\`\`\``
+        ? `Hai @${mentioned.split('@')[0]}\n\nTingkat kepsikopatan kamu *${percent}%*\n\`\`\`${desc}\`\`\`\n\n_Cuma buat lucu-lucuan ya, jangan baper! 😂_` 
+        : `Kamu ingin ngecek tingkat kepsikopatan @${mentioned.split('@')[0]} yak?\n\nTingkat kepsikopatan dia sebesar *${percent}%*\n\`\`\`${desc}\`\`\`\n\n_Cuma buat lucu-lucuan ya, jangan baper! 😂_`
     
     await conn.sendMessage(m.chat, { text: txt, mentions: [mentioned] }, { quoted: m })
 }
