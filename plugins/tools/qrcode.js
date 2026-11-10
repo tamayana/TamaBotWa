@@ -1,4 +1,4 @@
-import axios from 'axios'
+import QRCode from 'qrcode'
 import config from '../../config.js'
 
 let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
@@ -7,17 +7,12 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
     await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
 
     try {
-        const url = `https://api.ikyyxd.my.id/tools/qrcode?text=${encodeURIComponent(text)}`
-        const res = await axios.get(url, { responseType: 'arraybuffer' })
-        
-        let imgBuffer = Buffer.from(res.data)
-       
-        if (!(res.headers['content-type'] || '').includes('image')) {
-            const match = imgBuffer.toString('utf-8').match(/https?:\/\/[^\s"']+/g)
-            if (!match) throw new Error('API tidak mengembalikan format gambar yang valid.')
-            const imgRes = await axios.get(match[0], { responseType: 'arraybuffer' })
-            imgBuffer = Buffer.from(imgRes.data)
-        }
+        // BIKIN QR LANGSUNG DI SERVER LU, GAK NGIRIM KE SIAPAPUN!
+        let imgBuffer = await QRCode.toBuffer(text, {
+            width: 512,
+            margin: 2,
+            color: { dark: '#000000', light: '#FFFFFF' }
+        })
 
         await conn.sendMessage(m.chat, {
             image: imgBuffer,
