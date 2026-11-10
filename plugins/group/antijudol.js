@@ -1,4 +1,4 @@
-import { getGroupSettings, setGroupSetting } from '../../lib/database.js'
+import { getGroupSettings, setGroupSettings } from '../../lib/database.js'
 
 // Kata-kata judol yang dideteksi
 const JUDOL_WORDS = [
@@ -8,23 +8,48 @@ const JUDOL_WORDS = [
     'situs slot', 'daftar slot', 'agen togel', 'bandar togel'
 ]
 
-// Simpen warn sementara, biar kalo bot restart ke-reset (kalo mau permanen, simpen di database.js)
 let warnDB = {}
 
-let handler = async (m, { conn }) => {}
+// ─── COMMAND: .antijudol on/off/kick ───
+let handler = async (m, { conn, args, usedPrefix, command, RaplyGwe }) => {
+    if (!args[0]) {
+        const cfg = getGroupSettings(m.chat)
+        return RaplyGwe(
+            `*Anti Judol*\n\n` +
+            `Status: ${cfg?.antijudol ? '✅ ON' : '❌ OFF'}${cfg?.antijudolKick ? ' + KICK' : ''}\n\n` +
+            `Cara pakai:\n` +
+            `${usedPrefix + command} on - Nyalain, hapus pesan + warn\n` +
+            `${usedPrefix + command} off - Matiin\n` +
+            `${usedPrefix + command} kick - Nyalain + Kick kalo 3x warn`
+        )
+    }
+
+    const mode = args[0].toLowerCase()
+    if (mode === 'on') {
+        setGroupSettings(m.chat, { antijudol: true, antijudolKick: false })
+        return RaplyGwe(`✅ *Anti Judol ON!*\nPesan judol bakal dihapus + kena warn!`)
+    }
+    if (mode === 'off') {
+        setGroupSettings(m.chat, { antijudol: false, antijudolKick: false })
+        return RaplyGwe(`❌ *Anti Judol OFF!*`)
+    }
+    if (mode === 'kick') {
+        setGroupSettings(m.chat, { antijudol: true, antijudolKick: true })
+        return RaplyGwe(`✅ *Anti Judol ON + KICK!*\nKalo udah 3x warn, langsung di-kick!`)
+    }
+    return RaplyGwe(`Pakai: ${usedPrefix + command} on / off / kick`)
+}
 
 handler.before = async function (m, { conn }) {
     if (!m.isGroup) return
     if (!m.text) return
     if (m.fromMe) return
-    if (m.isAdmin) return // Admin bebas, biar gak kena razia sendiri 😅
+    if (m.isAdmin) return
 
     const cfg = getGroupSettings(m.chat)
-    if (!cfg?.antijudol) return // Kalo antijudol OFF, bot diem aja
+    if (!cfg?.antijudol) return
 
     const text = m.text.toLowerCase()
-
-    // Cek ada kata judol gak?
     const kena = JUDOL_WORDS.some(w => text.includes(w))
     if (!kena) return
 
@@ -32,18 +57,14 @@ handler.before = async function (m, { conn }) {
     const chatId = m.chat
 
     try {
-        // 1. HAPUS PESAN JUDOL NYA!
         await conn.sendMessage(chatId, { delete: m.key })
 
-        // 2. TAMBAH WARN!
         if (!warnDB[chatId]) warnDB[chatId] = {}
         if (!warnDB[chatId][sender]) warnDB[chatId][sender] = 0
         warnDB[chatId][sender]++
         const warnCount = warnDB[chatId][sender]
 
-        // 3. BOT MERAHIN DIA!
         if (cfg.antijudolKick && warnCount >= 3) {
-            // UDAH 3X, LANGSUNG KICK!
             await conn.sendMessage(chatId, {
                 text: `🚨 *KENA KICK!* 🚨\n\n@${sender.split('@')[0]} udah 3x kirim JUDOL di grup ini!\n\n❌ Pesan dihapus\n❌ Kena warn 3/3\n❌ LANGSUNG DIKICK!\n\nBye-bye tukang judol! 👋`,
                 mentions: [sender]
@@ -53,7 +74,6 @@ handler.before = async function (m, { conn }) {
             return
         }
 
-        // KALO BELUM 3X, MERAHIN AJA!
         let merahinText = `🚨 *WOY! KETANGKEP JUDOL!* 🚨\n\n`
             + `@${sender.split('@')[0]} jangan kirim JUDOL di grup ini!\n\n`
             + `❌ Pesan lu udah gua hapus!\n`
@@ -70,12 +90,10 @@ handler.before = async function (m, { conn }) {
             mentions: [sender]
         })
 
-        // Kasih react marah biar makin malu 😂
         await conn.sendMessage(chatId, { react: { text: '😡', key: m.key } })
 
     } catch (e) {
         console.log('ANTIJUDOL EVENT ERROR:', e.message)
-        // Kalo gagal hapus, berarti bot bukan admin!
         if (e.message.includes('not-admin') || e.message.includes('403')) {
             await conn.sendMessage(chatId, {
                 text: `⚠️ Gua mau hapus pesan judol dari @${sender.split('@')[0]} tapi gua bukan Admin! Jadikan gua Admin dulu!`,
@@ -84,5 +102,12 @@ handler.before = async function (m, { conn }) {
         }
     }
 }
+
+handler.help = ['antijudol <on/off/kick>']
+handler.tags = ['group']
+handler.command = /^(antijudol)$/i
+handler.group = true
+handler.admin = true
+handler.botAdmin = true
 
 export default handler
