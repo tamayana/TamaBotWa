@@ -1,5 +1,4 @@
-import axios from 'axios'
-import FormData from 'form-data'
+import JavaScriptObfuscator from 'javascript-obfuscator'
 
 let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
     let q = m.quoted ? m.quoted : m
@@ -20,31 +19,40 @@ let handler = async (m, { conn, text, usedPrefix, command, RaplyGwe }) => {
     await m.react('🕒')
 
     try {
-        let form = new FormData()
-        form.append('code', code)
-        form.append('level', 'low')
-
-        let { data } = await axios.post('https://api.kyzzz.xyz/api/tools/js-obfuscator', form, {
-            params: { apikey: 'kyzz211554828' },
-            headers: form.getHeaders(),
-            timeout: 60000,
-            maxBodyLength: Infinity
+        // ENC LANGSUNG DI BOT BUNG! GAK PERLU KIRIM KE SERVER ORANG LAGI!
+        // Kode lu aman, gak ada yang bisa nyuri!
+        const result = JavaScriptObfuscator.obfuscate(code, {
+            compact: true,
+            controlFlowFlattening: true,
+            controlFlowFlatteningThreshold: 0.75,
+            deadCodeInjection: true,
+            deadCodeInjectionThreshold: 0.4,
+            debugProtection: false,
+            disableConsoleOutput: false,
+            identifierNamesGenerator: 'hexadecimal',
+            renameGlobals: false,
+            selfDefending: true,
+            stringArray: true,
+            stringArrayEncoding: ['base64'],
+            stringArrayThreshold: 0.75,
+            transformObjectKeys: true,
+            unicodeEscapeSequence: false
         })
 
-        if (!data?.status || !data?.result) throw new Error(data?.message || data?.error || 'Respon kosong dari API.')
+        const obfuscated = result.getObfuscatedCode()
 
         await conn.sendMessage(m.chat, {
-            document: Buffer.from(data.result, 'utf-8'),
+            document: Buffer.from(obfuscated, 'utf-8'),
             mimetype: 'application/javascript',
             fileName: 'enc.js',
-            caption: `✅ *Enc berhasil*\n\n◦ Ukuran asli: ${data.originalLength}\n◦ Ukuran hasil: ${data.obfuscatedLength}`
+            caption: `✅ *Enc berhasil*\n\n◦ Ukuran asli: ${code.length}\n◦ Ukuran hasil: ${obfuscated.length}\n◦ Mode: Local (Tanpa API)`
         }, { quoted: m })
 
         await m.react('✅')
     } catch (e) {
         console.error('[enc]', e)
         await m.react('❌')
-        await RaplyGwe(`❌ *Gagal:* ${e.response?.data?.message || e.response?.data?.error || e.message}`.slice(0, 600))
+        await RaplyGwe(`❌ *Gagal:* ${e.message}`.slice(0, 600))
     }
 }
 
