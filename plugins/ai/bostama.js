@@ -27,7 +27,7 @@ let handler = async (m, { conn, text }) => {
             ]
             let pick = roastFoto[Math.floor(Math.random() * roastFoto.length)]
             let imgBuffer = await q.download()
-            await conn.sendMessage(m.chat, { image: imgBuffer, caption: `*🔥 BOSTAMA ROASTING:*\n\n${pick}\n\n_Man makan man haa makan lah man🤝_` }, { quoted: m })
+            await conn.sendMessage(m.chat, { image: imgBuffer, caption: `*🔥 BOSTAMA ROASTING:*\n\n${pick}` }, { quoted: m })
             return
         } catch (e) { console.log(e) }
     }
@@ -108,12 +108,12 @@ let handler = async (m, { conn, text }) => {
             `Sakit hati? Yaelah, semua orang pernah! Gua juga pernah! Tapi gua gak lebay kayak lu! Gua nangis semalem, besoknya udah nongkrong lagi! Gitu dong!`,
             `Lu tuh galau nya tuh halu! Pacaran aja baru seminggu, galau nya kayak 7 tahun! Lebay banget! Udah, hapus foto nya, blokir, move on!`,
             `Woy, dengerin gua! Lu tuh berharga! Jangan nangisin orang yang gak ngargain lu! Lu pantas dapet yang lebih baik! Yang sayang lu! Bukan yang nyakitin lu!`,
-            `Galau? Coba makan! Makan tuh obat galau paling ampuh! Man makan man haa makan lah man🤝 Abis makan, tidur! Besok bangun udah lupa!`,
+            `Galau? Coba makan! Makan tuh obat galau paling ampuh! Abis makan, tidur! Besok bangun udah lupa!`,
             `Udah lah, jangan sedih! Sedih tuh bikin muka lu jelek! Lu aja udah jelek, ditambah sedih, lengkap! Mending senyum! Senyum tuh bikin lu keliatan ganteng dikit!`
         ]
         jawaban = arr[Math.floor(Math.random() * arr.length)]
 
-    // ===== 5. LAPAR / MAKAN =====
+    // ===== 5. LAPAR / MAKAN - SATU-SATUNYA YANG BOLEH ADA MAN MAKAN MAN! =====
     } else if (t.includes('lapar') || t.includes('laper') || t.includes('makan') || t.includes('perut') || t.includes('pengen makan') || t.includes('hungry')) {
         let arr = [
             `Lapar? Ya makan lah woy! Ngapain nanya ke gua? Gua bukan GoFood! Buka kulkas! Kalo kulkas kosong, ya masak! Kalo gak bisa masak, ya order! Jangan nanya mulu!`,
@@ -125,7 +125,9 @@ let handler = async (m, { conn, text }) => {
             `Laper? Coba minum dulu! Kadang lapar tuh cuma haus! Kalo abis minum masih lapar, ya makan! Jangan sok diet! Diet lu gagal mulu!`,
             `Bro, lu tuh tiap jam lapar! Baru makan sejam yang lalu, udah lapar lagi! Lu tuh perut nya perut karet ya? Melar mulu!`,
             `Makan apa? Terserah! Yang penting makan! Jangan tanya "makan apa ya?" ke gua! Gua bukan emak lu! Buka kulkas, apa yang ada, makan!`,
-            `Udah lah, jangan lapar-laparan! Makan yang banyak! Biar gemuk dikit! Biar gak dikira kurang gizi! Makan! Makan! Makan! 🤝`
+            `Udah lah, jangan lapar-laparan! Makan yang banyak! Biar gemuk dikit! Biar gak dikira kurang gizi! Makan! Makan! Makan! 🤝`,
+            `Man makan man haa makan lah man🤝 Lu lapar kan? Yaudah makan! Jangan chat gua mulu!`,
+            `Laper? Man makan man haa makan lah man🤝 Jangan ditahan! Nanti maag lu kambuh!`
         ]
         jawaban = arr[Math.floor(Math.random() * arr.length)]
 
@@ -155,13 +157,35 @@ let handler = async (m, { conn, text }) => {
             `Top up mulu! Duit jajan abis buat top up! Skin banyak, skill 0! Buat apa skin bagus kalo main nya beban?`,
             `Mabar yuk? Yuk! Tapi jangan nangis kalo kalah! Kalah tuh biasa! Yang gak biasa tuh lu yang ngamuk-ngamuk kalo kalah!`,
             `Rank lu stuck? Ya pantes! Lu main nya solo, tapi egois! Main tuh teamwork! Bukan sok jago sendiri!`,
-            `Bro, lu tuh main game sampe lupa makan! Makan woy! Man makan man haa makan lah man🤝 Jangan game mulu!`,
+            `Bro, lu tuh main game sampe lupa makan! Makan woy! Jangan game mulu!`,
             `FF? ML? Roblox? Semua lu mainin! Tapi pelajaran 1 pun gak ada yang lu kuasai! Gimana sih lu?`,
             `Udah lah, jangan main game mulu! Sekali-sekali keluar rumah! Liat dunia nyata! Dunia nyata lebih seru dari game!`
         ]
         jawaban = arr[Math.floor(Math.random() * arr.length)]
 
-    // ===== 8. ROASTING / GANTENG / RIZZ =====
+    // ===== 8. ROASTING NAMA TEMEN - HARUS DI ATAS ROASTING BIASA BIAR KEDETEK! =====
+    } else if ((t.includes('roasting ') || t.includes('roast ') || t.includes('hina ') || t.includes('jelekin ') || t.includes('hujat ')) && text.length > 8) {
+        let nama = text.replace(/roasting|hina|roast|jelekin|hujat/gi, '').trim() || 'temen lu'
+        let arr = [
+            `${nama}? Jir! ${nama} tuh mukanya kayak WiFi lemot, susah dicari, gampang ilang!`,
+            `Dih, ${nama} tuh kalo foto, kamera nya langsung nge-blur sendiri! Saking gak kuat liat muka nya!`,
+            `${nama} tuh aura nya minus! Tiap dateng, HP orang langsung lowbat! Saking negatif nya!`,
+            `Spill! ${nama} tuh tiap hari rebahan, tapi sok sibuk! Sok sibuk padahal gabut!`,
+            `${nama}? Oh yang kalo di-chat balesnya 3 hari kemudian itu? Sok artis banget dia!`,
+            `Woy, ${nama} tuh kalo senyum, orang kira dia lagi nahan berak! Serem!`,
+            `${nama} tuh Rizz nya -1000! Cewek liat dia langsung ilfeel! Langsung lari!`,
+            `${nama} tuh kalo main game, feeder mulu! Beban tim! Tiap war mati duluan!`,
+            `Jir, ${nama} tuh mandi nya seminggu sekali! Minyak nya bisa buat goreng tempe 2 kilo!`,
+            `${nama} tuh kalo disuruh belajar ngantuk, kalo disuruh main game melek sampe pagi! Otak nya kebalik!`,
+            `${nama} tuh ganteng nya cuma di KTP doang! Di dunia nyata, ya gitu lah!`,
+            `Dih, ${nama} tuh kalo foto pake filter 10 lapis aja masih burik! Filter nya nyerah!`,
+            `${nama} tuh kalo ngomong, orang langsung ngantuk! Suara nya kayak dongeng pengantar tidur!`,
+            `Woy, ${nama} tuh kalo nongkrong, yang dibayar cuma parkir! Pelit banget!`,
+            `${nama} tuh kalo ditanya "kapan nikah?" langsung kabur! Soalnya jomblo akut!`
+        ]
+        jawaban = arr[Math.floor(Math.random() * arr.length)]
+
+    // ===== 8A. ROASTING / GANTENG / RIZZ (BIASA) =====
     } else if (t.includes('cantik') || t.includes('ganteng') || t.includes('jelek') || t.includes('roasting') || t.includes('hina') || t.includes('jelekin') || t.includes('rizz')) {
         let arr = [
             `Lu minta di-roasting? Berani lu! Muka lu tuh kayak WiFi lemot, susah dicari, gampang ilang! Udah lah, ngaca dulu sana!`,
@@ -177,28 +201,110 @@ let handler = async (m, { conn, text }) => {
         ]
         jawaban = arr[Math.floor(Math.random() * arr.length)]
 
-            // ===== 8.5 HARI / TANGGAL - INI YANG HILANG! =====
+    // ===== 8.5 HARI / TANGGAL =====
     } else if (t.includes('hari') || t.includes('tanggal') || t.includes('kamis') || t.includes('sabtu') || t.includes('senin') || t.includes('selasa') || t.includes('rabu') || t.includes('jumat') || t.includes('minggu') || t.includes('besok') || t.includes('kemarin')) {
-        
-        // AMBIL TANGGAL BENERAN DARI HP / VPS, JANGAN NGARANG!
         let now = new Date()
         let hariBeneran = now.toLocaleDateString('id-ID', { timeZone: 'Asia/Pontianak', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-        // Hasilnya: "Kamis, 12 November 2026"
-
-        // KALO USER LAGI NGOREKSI LU
         if (t.includes('kepala kau') || t.includes('salah') || t.includes('bukan sabtu') || t.includes('kamis')) {
-            jawaban = `EH IYA DENG! SORRY BUNG! 🤣 Gua salah! Hari ini tuh ${hariBeneran} woy! Bukan Sabtu! Tadi gua ngelantur! Maklum, gua belum makan! Man makan man haa makan lah man🤝`
+            let arrNgaku = [
+                `EH IYA DENG! SORRY BUNG! 🤣 Gua salah! Hari ini tuh ${hariBeneran} woy! Bukan Sabtu! Tadi gua ngelantur!`,
+                `Woy iya! Maaf! Hari ini ${hariBeneran}! Gua tadi kepleset! Otak gua masih loading!`,
+                `Anjir iya deng! ${hariBeneran} woy! Bukan Sabtu! Gua ngantuk tadi! Maaf ya bos!`,
+                `Eh, bener juga lu! Hari ini ${hariBeneran}! Gua salah! Jangan marah-marah! Nanti cepet tua!`,
+                `IYA IYA GUA SALAH! Hari ini ${hariBeneran}! Lu bener! Gua yang tolol! Puas?`,
+                `Waduh ketauan! Iya, hari ini ${hariBeneran}! Gua tadi sok tau! Ampun bos!`,
+                `SORRY! Hari ini ${hariBeneran}! Bukan Sabtu! Gua kira masih Sabtu! Maklum, tiap hari gua rebahan!`
+            ]
+            jawaban = arrNgaku[Math.floor(Math.random() * arrNgaku.length)]
         } else {
             let arrHari = [
                 `Hari ini tuh ${hariBeneran} woy! Lu bosen ya? Sama! Gua juga bosen! Mending makan!`,
                 `Woy, hari ini ${hariBeneran}! Lu lupa hari saking gabutnya ya? Bangun woy! Jangan rebahan mulu!`,
-                `Ini hari ${hariBeneran}! Jangan tanya lagi! Nanti gua lupa lagi! Otak gua RAM nya 1GB!`
+                `Ini hari ${hariBeneran}! Jangan tanya lagi! Nanti gua lupa lagi! Otak gua RAM nya 1GB!`,
+                `Hari ini ${hariBeneran} lah! Lu kira hari ini hari apa? Hari kiamat? Lebay lu!`,
+                `Woy, sekarang ${hariBeneran}! Lu nanya hari mulu, emang lu mau ngapain? Mau nikah?`,
+                `Dih, ${hariBeneran} aja gak tau! Lu tidur berapa hari? Bangun woy! Udah siang!`,
+                `Ini ${hariBeneran}! Catet! Jangan nanya lagi besok! Besok tanya lagi, gua jitak lu!`,
+                `Hari ini tuh ${hariBeneran}, lu bosen? Sama! Gua juga bosen liat muka lu tiap hari!`,
+                `Woy! ${hariBeneran}! Lu lupa hari karena kebanyakan scroll TikTok kan? Ngaku aja!`,
+                `Sekarang ${hariBeneran} woy! Cepet mandi! Bau lu sampe sini!`,
+                `Hari ini ${hariBeneran}! Jangan rebahan mulu! Keluar! Cari cuan!`,
+                `Lu nanya hari? Nih gua kasih tau: ${hariBeneran}! Puas? Udah, sana makan!`,
+                `Anjir, ${hariBeneran} aja ditanya! Lu sekolah tidur mulu ya? Pantes gak tau hari!`
             ]
             jawaban = arrHari[Math.floor(Math.random() * arrHari.length)]
         }
-        // JANGAN PAKE CLOSING RANDOM BUAT KATEGORI HARI!
         await conn.sendMessage(m.chat, { text: `*😒 BOSTAMA:*\n\n${jawaban}` }, { quoted: m })
         return
+
+    // ===== 8.6 BOSEN / CAPEK / NGANTUK =====
+    } else if (t.includes('bosen') || t.includes('bosan') || t.includes('capek') || t.includes('ngantuk') || t.includes('gabut') || t.includes('mager')) {
+        let arr = [
+            `Bosen? Sama! Gua juga bosen liat chat lu! Mending makan!`,
+            `Gabut? Ya keluar woy! Jangan di kamar mulu! Di kamar gak ada hiburan! Adanya kasur sama bau kaki!`,
+            `Capek? Capek ngapain? Capek rebahan? Lu rebahan aja capek, gimana kerja?`,
+            `Ngantuk? Ya tidur lah! Ngapain chat gua? Gua bukan bantal! Tidur sana!`,
+            `Mager? Mager tuh penyakit! Obatnya tuh bangun, mandi, makan! Coba lakuin!`,
+            `Bosen mulu! Coba cari hobi! Jangan scroll TikTok mulu! TikTok lu itu yang bikin lu bosen!`,
+            `Woy, bosen itu karena lu gak ngapa-ngapain! Coba nongkrong! Cari cuan! Jangan gabut!`,
+            `Ngantuk tapi gak tidur-tidur? Itu namanya insomnia! Gara-gara main HP sampe pagi kan?`,
+            `Capek hati? Yaelah, galau lagi? Udah, makan dulu! Abis makan, tidur! Besok lupa!`,
+            `Gabut? Sini gua kasih kerjaan! Cuci piring, sapu rumah, mandiin kucing! Mau? Enggak kan? Yaudah gabut aja!`
+        ]
+        jawaban = arr[Math.floor(Math.random() * arr.length)]
+
+    // ===== 8.7 KANGEN / SAYANG / HALO =====
+    } else if (t.includes('kangen') || t.includes('sayang') || t.includes('halo') || t.includes('hai') || t.includes('hei') || t.includes('assalamualaikum') || t.includes('selamat')) {
+        let arr = [
+            `Halo juga woy! Tumben nyapa! Ada maunya ya? Mau minjem duit ya? Ngaku aja!`,
+            `Kangen? Kangen sama siapa? Sama mantan? Udah move on woy! Jangan kangen-kangenan!`,
+            `Sayang? Sayang sama siapa? Sama gua? Jir, gua bot woy! Jangan baper!`,
+            `Assalamualaikum juga! Tumben sopan! Biasanya toxic! Ada maunya ya?`,
+            `Hai juga! Mau nanya apa? Jangan basa-basi! Langsung aja! Gua sibuk!`,
+            `Selamat apa? Selamat pagi? Selamat siang? Selamat lu udah bangun? Akhirnya bangun juga lu!`,
+            `Woy, kangen tuh berat! Lu aja yang kangen, dia nya enggak! Sakit kan?`,
+            `Halo! Lu sehat? Kok tumben chat gua? Biasanya lu ghosting gua!`,
+            `Sayang-sayang apaan? Lu sayang sama duit ya? Sama! Gua juga!`,
+            `Kangen gua ya? Yaelah, gua aja kangen sama lu! Tapi gua gengsi ngomongnya!`
+        ]
+        jawaban = arr[Math.floor(Math.random() * arr.length)]
+
+    // ===== 8.9 PANTUN =====
+    } else if (t.includes('pantun')) {
+        let arr = [
+            `Ke pasar beli kedondong, pulang-pulang bawa mangga! Lu jomblo sampe sekarang, karena chat cewek cuma "P" doang!`,
+            `Jalan-jalan ke Pontianak, jangan lupa beli sotong! Lu sok ganteng banget, padahal muka lu kayak kentang!`,
+            `Makan nasi pake sambel, sambel nya pedes banget! Lu sok cool, sok cuek, padahal di-chat gak dibales, nangis banget!`,
+            `Pergi ke warung beli sabun, pulang-pulang bawa odol! Lu ngaku nya sibuk, padahal di kamar rebahan, scroll TikTok sampe tolol!`,
+            `Buah mangga buah rambutan, dimakan bareng si Dede! Lu ngaku nya tampan, padahal foto lu aja pake filter 10 lapis, masih aja jelek!`,
+            `Naik motor ke Singkawang, singgah dulu beli duren! Lu kalo ngomong sok jagoan, tapi kalo ditagih utang, langsung pura-pura amnesia, keren!`,
+            `Ke pasar beli ikan lele, ikan nya lompat-lompat! Lu kalo ditanya kapan nikah, jawabnya "nanti", padahal pacar aja gak dapet-dapet!`,
+            `Makan bubur pake kerupuk, kerupuk nya gosong! Lu sok-sokan aesthetic, padahal kamar lu kayak kapal pecah, berantakan, bau gosong!`,
+            `Jalan-jalan ke tepi sungai, liat buaya lagi berjemur! Lu sok-sokan sigma, padahal lu tuh beta, alpha nya aja gak ada, ambyar!`,
+            `Beli baju di pasar malam, baju nya warna pink! Lu sok-sokan cool, padahal kalo liat crush, langsung salting, muka lu merah kayak pink!`,
+            `Minum es teh di warung, es nya dingin banget! Lu kalo disuruh belajar, ngantuk banget, tapi kalo disuruh main game, melek sampe pagi, hebat!`,
+            `Ke hutan cari kayu, kayu nya buat api! Lu kalo galau, nangis mulu, padahal mantan lu udah happy sama yang baru, lu masih aja nangis, basi!`
+        ]
+        jawaban = arr[Math.floor(Math.random() * arr.length)]
+
+    // ===== 8.10 TEBAK-TEBAKAN =====
+    } else if (t.includes('tebak') || t.includes('kuis') || t.includes('quiz')) {
+        let arr = [
+            `Nih tebak! Binatang apa yang paling diam? ... DIAMETER! Hahaha garing? Yaudah, lu aja yang garing!`,
+            `Tebak! Buah apa yang paling ditakuti? ... Buah-buahan! Soalnya kalo dimakan, abis! Garing ya? Bodo amat!`,
+            `Hewan apa yang paling kaya? ... BERUANG! Soalnya punya banyak... Bulu? Eh, beruang kan punya... Yaudah lah, pokoknya beruang!`,
+            `Kenapa ayam nyebrang jalan? ... Karena mau ke seberang! Yaelah, lu aja gak kepikiran!`,
+            `Apa bedanya lu sama gorengan? ... Gorengan masih ada yang mau beli! Lu? Gak ada yang mau! Sakit? Biarin!`,
+            `Kenapa air laut asin? ... Karena ikan nya pada keringetan! Jir, ikan keringetan! Ngakak gak? Enggak? Yaudah!`,
+            `Apa yang naik tapi gak pernah turun? ... UMUR LU! Tiap tahun nambah, tapi jodoh gak nambah-nambah!`,
+            `Buah apa yang paling rajin? ... Buah DADA! Eh, buah... Buah-buahan yang rajin belajar! Apaan sih gua!`,
+            `Kenapa cicak nempel di dinding? ... Karena dia gak punya duit buat beli kasur! Kasihan!`,
+            `Tebak! Kota apa yang paling dingin? ... KOTA... KOTAK ES! Dingin kan? Garing? Yaudah, lu bikin yang lucu sana!`,
+            `Hewan apa yang bisa terbang tapi gak punya sayap? ... WAKTU! Waktu terbang cepet banget! Lu rebahan tau-tau udah tua!`,
+            `Apa yang ada di tengah-tengah Jakarta? ... Huruf "K"! Kalo "A" ada di tengah-tengah... Yaudah, lu mikir sendiri!`
+        ]
+        jawaban = arr[Math.floor(Math.random() * arr.length)]
+
     // ===== 9. FITUR BARU: KALO GAK ADA DI KATEGORI MANA-MANA! =====
     } else {
         let arr = [
@@ -216,7 +322,7 @@ let handler = async (m, { conn, text }) => {
         jawaban = arr[Math.floor(Math.random() * arr.length)]
     }
 
-    let closingList = [`\n\n_Udah sana kerja, jangan gabut mulu!_`, `\n\n_Man makan man haa makan lah man🤝_`, `\n\n_Bubar! Bubar! Gua mau nongkrong!_`, `\n\n_Jangan nanya yang aneh-aneh lagi!_`, `\n\n_Spill ke temen lu, suruh nanya juga!_`]
+    let closingList = [`\n\n_Udah sana kerja, jangan gabut mulu!_`, `\n\n_Bubar! Bubar! Gua mau nongkrong!_`, `\n\n_Jangan nanya yang aneh-aneh lagi!_`, `\n\n_Spill ke temen lu, suruh nanya juga!_`, `\n\n_Udah ah, gua mau turu!_`]
     let closing = closingList[Math.floor(Math.random() * closingList.length)]
 
     await conn.sendMessage(m.chat, { text: `*😒 BOSTAMA:*\n\n${jawaban}${closing}` }, { quoted: m })
