@@ -11,6 +11,6 @@ let handler = async (m, { conn }) => {
     await conn.sendMessage(m.chat, { text: `*💘 CEK JODOH!*\n\n@${target.split('@')[0]} ❤️ @${target2.split('@')[0]}\n\nKecocokan: *${persen}%*\n${komen}` }, { quoted: m })
 }
 handler.help = ['jodoh']
-handler.tags = ['fun']
+handler.tags = ['mctama']
 handler.command = /^jodoh|cekejodoh$/i
 export default handler
