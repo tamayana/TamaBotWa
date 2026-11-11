@@ -6,7 +6,7 @@ let handler = async (m, { conn }) => {
     list.push(m.sender)
     await conn.sendMessage(m.chat, { text: `*✅ ABSEN BERHASIL!*\n\n@${m.sender.split('@')[0]} udah absen!\n\nTotal yang udah absen: *${list.length} orang*!\n\nYang belum absen, cepet absen! Ketik *.absen*` }, { quoted: m })
 }
-handler.help = ['absen', 'cekabsen']
-handler.tags = ['group']
+handler.help = ['absen']
+handler.tags = ['mctama']
 handler.command = /^absen$/i
 export default handler
