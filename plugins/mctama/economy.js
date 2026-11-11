@@ -1,5 +1,3 @@
-// plugins/game/economy.js
-// Database simpel pake global.db
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     let user = global.db.data.users[m.sender]
     if (!user) {
@@ -7,14 +5,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         user = global.db.data.users[m.sender]
     }
     if (!user.money) user.money = 0
-
     if (command === 'dompet' || command === 'saldo' || command === 'money') {
         return m.reply(`*💰 DOMPET LU!*\n\nNama: @${m.sender.split('@')[0]}\nSaldo: *${user.money} Koin* 🪙\n\nKetik *.daily* buat klaim harian!`)
     }
-
     if (command === 'daily' || command === 'klaim') {
         let now = Date.now()
-        let cooldown = 24 * 60 * 60 * 1000 // 24 jam
+        let cooldown = 24 * 60 * 60 * 1000
         if (now - (user.lastDaily || 0) < cooldown) {
             let sisa = Math.ceil((cooldown - (now - user.lastDaily)) / 3600000)
             return m.reply(`Udah klaim woy! Besok lagi! Sisa ${sisa} jam lagi!`)
@@ -24,7 +20,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         user.lastDaily = now
         return m.reply(`*DAILY CLAIM BERHASIL!* 🎉\n\nLu dapet *${dapet} Koin*!\nSaldo sekarang: *${user.money} Koin*!`)
     }
-
     if (command === 'transfer' || command === 'tf') {
         let target = m.mentionedJid?.[0]
         let jumlah = parseInt(args[1] || args[0])
