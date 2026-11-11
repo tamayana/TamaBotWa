@@ -1,5 +1,5 @@
 let handler = async (m, { conn, text }) => {
-    if (!text) return m.reply('Cara pakai:\n*.reminder 10m belajar*\n*.reminder 1j makan*\n\nm = menit, j = jam')
+    if (!text) return m.reply('Cara pakai:\n*.reminder 10m belajar*\n*.reminder 1j makan*')
     let [waktu, ...pesan] = text.split(' ')
     let pesanFull = pesan.join(' ')
     if (!pesanFull) return m.reply('Mau diingetin apa?')
@@ -10,10 +10,10 @@ let handler = async (m, { conn, text }) => {
     else return m.reply('Format waktu salah! Pakai m / j! Contoh: *.reminder 10m belajar*')
     await m.reply(`*REMINDER AKTIF!* ⏰\n\nGua bakal ingetin lu *${waktu}* lagi buat: *${pesanFull}*`)
     setTimeout(() => {
-        conn.sendMessage(m.chat, { text: `*⏰ REMINDER!*\n\n@${m.sender.split('@')[0]} woy! Udah waktunya: *${pesanFull}*!\nJangan mager!` })
+        conn.sendMessage(m.chat, { text: `*⏰ REMINDER!*\n\n@${m.sender.split('@')[0]} woy! Udah waktunya: *${pesanFull}*!` })
     }, detik)
 }
 handler.help = ['reminder']
-handler.tags = ['tools']
+handler.tags = ['mctama']
 handler.command = /^reminder|ingetin$/i
 export default handler
