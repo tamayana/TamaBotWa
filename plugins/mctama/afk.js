@@ -24,6 +24,6 @@ handler.before = async (m, { conn }) => {
     }
 }
 handler.help = ['afk']
-handler.tags = ['main']
+handler.tags = ['mctama']
 handler.command = /^afk$/i
 export default handler
