@@ -177,6 +177,28 @@ let handler = async (m, { conn, text }) => {
         ]
         jawaban = arr[Math.floor(Math.random() * arr.length)]
 
+            // ===== 8.5 HARI / TANGGAL - INI YANG HILANG! =====
+    } else if (t.includes('hari') || t.includes('tanggal') || t.includes('kamis') || t.includes('sabtu') || t.includes('senin') || t.includes('selasa') || t.includes('rabu') || t.includes('jumat') || t.includes('minggu') || t.includes('besok') || t.includes('kemarin')) {
+        
+        // AMBIL TANGGAL BENERAN DARI HP / VPS, JANGAN NGARANG!
+        let now = new Date()
+        let hariBeneran = now.toLocaleDateString('id-ID', { timeZone: 'Asia/Pontianak', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+        // Hasilnya: "Kamis, 12 November 2026"
+
+        // KALO USER LAGI NGOREKSI LU
+        if (t.includes('kepala kau') || t.includes('salah') || t.includes('bukan sabtu') || t.includes('kamis')) {
+            jawaban = `EH IYA DENG! SORRY BUNG! 🤣 Gua salah! Hari ini tuh ${hariBeneran} woy! Bukan Sabtu! Tadi gua ngelantur! Maklum, gua belum makan! Man makan man haa makan lah man🤝`
+        } else {
+            let arrHari = [
+                `Hari ini tuh ${hariBeneran} woy! Lu bosen ya? Sama! Gua juga bosen! Mending makan!`,
+                `Woy, hari ini ${hariBeneran}! Lu lupa hari saking gabutnya ya? Bangun woy! Jangan rebahan mulu!`,
+                `Ini hari ${hariBeneran}! Jangan tanya lagi! Nanti gua lupa lagi! Otak gua RAM nya 1GB!`
+            ]
+            jawaban = arrHari[Math.floor(Math.random() * arrHari.length)]
+        }
+        // JANGAN PAKE CLOSING RANDOM BUAT KATEGORI HARI!
+        await conn.sendMessage(m.chat, { text: `*😒 BOSTAMA:*\n\n${jawaban}` }, { quoted: m })
+        return
     // ===== 9. FITUR BARU: KALO GAK ADA DI KATEGORI MANA-MANA! =====
     } else {
         let arr = [
