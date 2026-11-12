@@ -24,6 +24,8 @@ const watchers = new Map()
 const pendingReloads = new Map()
 const msgCache = new Map()
 const metaCache = new Map()
+if (!global.confessDelete) global.confessDelete = new Set()
+if (!global.confessPending) global.confessPending = {}
 let thumb
 
 const qkontak = {
