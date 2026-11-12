@@ -1,5 +1,6 @@
+import fs from 'fs'
+
 let handler = async (m, { conn, usedPrefix }) => {
-    let name = m.pushName || 'Bestie'
     let runtime = process.uptime()
     let jam = Math.floor(runtime / 3600)
     let menit = Math.floor((runtime % 3600) / 60)
@@ -53,16 +54,11 @@ let handler = async (m, { conn, usedPrefix }) => {
 ╰─────────────────╯
 
 ╭───〔 🎮 𝗚𝗔𝗠𝗘 〕───╮
-│ • ${usedPrefix}asahotak
 │ • ${usedPrefix}daily
 │ • ${usedPrefix}dompet
-│ • ${usedPrefix}family100
-│ • ${usedPrefix}kuismath
 │ • ${usedPrefix}pesawat
 │ • ${usedPrefix}slot
 │ • ${usedPrefix}sonic
-│ • ${usedPrefix}tebakangka
-│ • ${usedPrefix}tebakata
 │ • ${usedPrefix}transfer
 ╰─────────────────╯
 
@@ -168,12 +164,29 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ • ${usedPrefix}tourl
 ╰─────────────────╯
 
-> _Ketik ${usedPrefix}allmenu buat liat semua!_`
+> _TAMA BOT - Gas pake bestie!_`
 
-    await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
+    // 1. MUSIK DULU! PAKE media/sound.mp3
+    try {
+        if (fs.existsSync('./media/sound.mp3')) {
+            await conn.sendMessage(m.chat, { audio: fs.readFileSync('./media/sound.mp3'), mimetype: 'audio/mp4', ptt: true }, { quoted: m })
+        }
+    } catch (e) { console.log('Sound gagal:', e) }
+
+    // 2. FOTO + MENU! PAKE media/thumb.jpg DOANG!
+    // banner-tamabotwa.png GAK DIPAKE! ITU CUMA BUAT GITHUB!
+    try {
+        if (fs.existsSync('./media/thumb.jpg')) {
+            await conn.sendMessage(m.chat, { image: fs.readFileSync('./media/thumb.jpg'), caption: text, mentions: [m.sender] }, { quoted: m })
+        } else {
+            await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
+        }
+    } catch (e) {
+        await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
+    }
 }
 
-handler.help = ['allmenu', 'menu']
+handler.help = ['allmenu']
 handler.tags = ['main']
-handler.command = /^(allmenu|menu)$/i
+handler.command = /^(allmenu)$/i
 export default handler
