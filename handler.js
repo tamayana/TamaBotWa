@@ -746,27 +746,29 @@ try {
     if (!global.db.data.users) global.db.data.users = {}
     let users = global.db.data.users
 
-    // Cari mentionedJid di SEMUA sudut m.message, gak peduli nyempil di mana!
     const cariMention = (obj, out = [], depth = 0) => {
-        if (!obj || typeof obj !== 'object' || depth > 8) return out
+        if (!obj || typeof obj !== 'object' || depth > 6) return out
         if (Array.isArray(obj)) { for (let v of obj) cariMention(v, out, depth + 1); return out }
         for (let k in obj) {
             if (k === 'mentionedJid' && Array.isArray(obj[k])) out.push(...obj[k])
-            else if (typeof obj[k] === 'object') cariMention(obj[k], out, depth + 1)
+            else if (typeof obj[k] === 'object' && k !== 'conn' && k !== 'key') cariMention(obj[k], out, depth + 1)
         }
         return out
     }
-    // Cari di m, m.message, m.msg, semuanya!
     let mentionedAFK = [...new Set([
         ...(m.mentionedJid || []),
         ...cariMention(m.message),
         ...cariMention(m.msg),
-        ...cariMention(m)
+        ...cariMention(m.message?.extendedTextMessage?.contextInfo),
+        ...cariMention(m.msg?.contextInfo)
     ])]
 
-    // Ubah LID -> Nomor HP pake groupMetadata (paling akurat!)
+    // Cuma ambil groupMetadata kalo di grup doang!
     let meta = null
-    try { meta = await conn.groupMetadata(m.chat).catch(() => null) } catch {}
+    let isGroup = m.chat?.endsWith('@g.us')
+    if (isGroup) {
+        try { meta = await conn.groupMetadata(m.chat) } catch {}
+    }
     const lidToPn = (jid) => {
         let j = String(jid)
         if (!j.endsWith('@lid')) return j
@@ -792,7 +794,6 @@ try {
             if (!users[k]?.afk) continue
             let kPn = await toPn(k)
             if (kPn === pn || k === String(jid)) return { jid: k, data: users[k] }
-            // Cocokin nomornya aja, buang @lid / @s.whatsapp.net nya
             if (kPn.split('@')[0] === pn.split('@')[0]) return { jid: k, data: users[k] }
         }
         return null
