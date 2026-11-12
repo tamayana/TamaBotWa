@@ -1,9 +1,9 @@
 let handler = async (m, { conn, usedPrefix }) => {
     let name = m.pushName || 'Bestie'
-    let runtime = process.uptime()
-    let jam = Math.floor(runtime / 3600)
-    let menit = Math.floor((runtime % 3600) / 60)
-    let detik = Math.floor(runtime % 60)
+    let uptime = process.uptime()
+    let jam = Math.floor(uptime / 3600)
+    let menit = Math.floor((uptime % 3600) / 60)
+    let detik = Math.floor(uptime % 60)
 
     let text = `👋 𝖧𝖾𝗅𝗈, @${m.sender.split('@')[0]} !
 
@@ -13,35 +13,44 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ ✦ 𝖱𝗎𝗇𝗍𝗂𝗆𝖾 : ${jam} Jam ${menit} Menit ${detik} Detik
 ╰─────────────────╯
 
-╭───〔 📋 𝗠𝗘𝗡𝗨 〕───╮
-│ • ${usedPrefix}allmenu - Semua Fitur
-│ • ${usedPrefix}menu - Menu Ini
-│ • ${usedPrefix}ping - Cek Bot
-│ • ${usedPrefix}donasi - Donasi
-│ • ${usedPrefix}sc - Script Bot
-╰─────────────────╯
+Ini daftar fitur nya, tinggal ketik aja di chat, gak usah di klik!
 
 ╭───〔 🤖 𝗔𝗜 〕───╮
-│ Ketik ${usedPrefix}allmenu buat liat AI
-│ Ada Gemini, Claude, DeepSeek, dll
+│ • .gemini <tanya>
+│ • .claude <tanya>
+│ • .deepseek <tanya>
+│ • .bostama <tanya>
 ╰─────────────────╯
 
 ╭───〔 🎮 𝗚𝗔𝗠𝗘 〕───╮
-│ Ketik ${usedPrefix}allmenu buat liat Game
-│ Ada Slot, Tebak Kata, Family100, dll
+│ • .slot
+│ • .pesawat
+│ • .sonic
 ╰─────────────────╯
 
 ╭───〔 👥 𝗚𝗥𝗢𝗨𝗣 〕───╮
-│ Ketik ${usedPrefix}allmenu buat liat Group
-│ Ada Kick, Add, Antilink, dll
+│ • .kick <@tag>
+│ • .add <nomor>
+│ • .promote <@tag>
+│ • .tagal <pesan>
 ╰─────────────────╯
 
 ╭───〔 🛠️ 𝗧𝗢𝗢𝗟𝗦 〕───╮
-│ Ketik ${usedPrefix}allmenu buat liat Tools
-│ Ada SSWeb, ToURL, CekGempa, dll
+│ • .sticker
+│ • .toimg
+│ • .tourl
+│ • .ssweb <link>
+│ • .cekgempa
 ╰─────────────────╯
 
-> _Ketik ${usedPrefix}allmenu buat liat semua command lengkap!_`
+╭───〔 📥 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗥 〕───╮
+│ • .tiktok <link>
+│ • .play <judul>
+│ • .capcut <url>
+╰─────────────────╯
+
+> _Mau liat semua? Ketik .allmenu_
+> _Mau cek bot hidup? Ketik .ping_`
 
     await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
 }
