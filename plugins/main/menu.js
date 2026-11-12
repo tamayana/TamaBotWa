@@ -1,55 +1,52 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
-import fs from 'fs'
-import config from '../../config.js'
-import { runtime, tanggal } from '../../lib/myfunc.js'
-import { plugins } from '../../handler.js'
+let handler = async (m, { conn, usedPrefix }) => {
+    let name = m.pushName || 'Bestie'
+    let runtime = process.uptime()
+    let jam = Math.floor(runtime / 3600)
+    let menit = Math.floor((runtime % 3600) / 60)
+    let detik = Math.floor(runtime % 60)
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const thumbPath = path.join(__dirname, '../../media/thumb.jpg')
+    let text = `👋 𝖧𝖾𝗅𝗈, @${m.sender.split('@')[0]} !
 
-let handler = async (m, { conn }) => {
-    const pushname = m.pushName || 'No Name'
-    const date = tanggal(Date.now())
-    const total = new Set(plugins.values()).size
+╭───〔 𝗧𝗔𝗠𝗔 𝗕𝗢𝗧 〕───╮
+│ ✦ 𝖢𝗋𝖾𝖺𝗍𝗈𝗋 : wa.me/6285393659857
+│ ✦ 𝖵𝖾𝗋𝗌𝗂𝗈𝗇 : 𝟥.𝟢𝟢
+│ ✦ 𝖱𝗎𝗇𝗍𝗂𝗆𝖾 : ${jam} Jam ${menit} Menit ${detik} Detik
+╰─────────────────╯
 
-    const anu = `👋 𝖧𝖾𝗅𝗈, 𝖶𝖾𝗅𝖼𝗈𝗆𝖾
-𝖯𝖾𝗋𝗄𝖾𝗇𝖺𝗅𝗄𝖺𝗇 𝗇𝖺𝗆𝖺 𝗌𝖺𝗒𝖺 \`${config.botName}\`, 𝖺𝗌𝗂𝗌𝗍𝖾𝗇 𝖶𝗁𝖺𝗍𝗌𝖠𝗉𝗉 𝗒𝖺𝗇𝗀 𝗌𝗂𝖺𝗉 𝗆𝖾𝗆𝖻𝖺𝗇𝗍𝗎 𝗄𝖺𝗆𝗎 𝗄𝖺𝗉𝖺𝗇 𝗌𝖺𝗃𝖺.
+╭───〔 📋 𝗠𝗘𝗡𝗨 〕───╮
+│ • ${usedPrefix}allmenu - Semua Fitur
+│ • ${usedPrefix}menu - Menu Ini
+│ • ${usedPrefix}ping - Cek Bot
+│ • ${usedPrefix}donasi - Donasi
+│ • ${usedPrefix}sc - Script Bot
+╰─────────────────╯
 
-◜🔔◞ *𝖨𝗇𝖿𝗈𝗋𝗆𝖺𝗍𝗂𝗈𝗇*
-└╼ *𝖢𝗋𝖾𝖺𝗍𝗈𝗋:* wa.me/6285393659857
-└╼ *𝖵𝖾𝗋𝗌𝗂𝗈𝗇:* 𝟥.𝟢𝟢
-└╼ *𝖳𝗈𝗍𝖺𝗅 𝖥𝗂𝗍𝗎𝗋:* ${total}
-└╼ *𝖬𝗈𝖽𝖾:* ${config.botMode === 'public' ? '*Public*' : '*Self*'}
-└╼ *𝖱𝗎𝗇 𝖳𝗂𝗆𝖾:* ${runtime(process.uptime())}
+╭───〔 🤖 𝗔𝗜 〕───╮
+│ Ketik ${usedPrefix}allmenu buat liat AI
+│ Ada Gemini, Claude, DeepSeek, dll
+╰─────────────────╯
 
-◜⁉️◞ *𝖴𝗌𝖾𝗋 𝖨𝗇𝖿𝗈𝗋𝗆𝖺𝗍𝗂𝗈𝗇*
-└╼ *𝗇𝖺𝗆𝖾:* ${pushname}
-└╼ *𝗌𝗍𝖺𝗍𝗎𝗌:* ${m.isCreator ? '*👑 Owner*' : m.isPremium ? '*💎 Premium*' : '*🫪 User Free*'}
+╭───〔 🎮 𝗚𝗔𝗠𝗘 〕───╮
+│ Ketik ${usedPrefix}allmenu buat liat Game
+│ Ada Slot, Tebak Kata, Family100, dll
+╰─────────────────╯
 
-> 𝗢𝗿𝗱𝗲𝗿 𝗣𝗮𝗻𝗲𝗹 𝗟𝗲𝗴𝗮𝗹!!
-📎 https://wa.me/6285393659857
+╭───〔 👥 𝗚𝗥𝗢𝗨𝗣 〕───╮
+│ Ketik ${usedPrefix}allmenu buat liat Group
+│ Ada Kick, Add, Antilink, dll
+╰─────────────────╯
 
-𝖪𝖾𝗍𝗂𝗄 .𝖺𝗅𝗅𝗆𝖾𝗇𝗎 𝗎𝗇𝗍𝗎𝗄 𝗆𝖾𝗅𝗂𝗁𝖺𝗍 𝗌𝖾𝗆𝗎𝖺 𝖿𝗂𝗍𝗎𝗋 & 𝗄𝖺𝗍𝖺𝗅𝗈𝗀 𝖳𝖺𝗆𝖺𝖡𝗈𝗍!
+╭───〔 🛠️ 𝗧𝗢𝗢𝗟𝗦 〕───╮
+│ Ketik ${usedPrefix}allmenu buat liat Tools
+│ Ada SSWeb, ToURL, CekGempa, dll
+╰─────────────────╯
 
-© Rahmad-Pratama`
+> _Ketik ${usedPrefix}allmenu buat liat semua command lengkap!_`
 
-    await conn.sendMessage(m.chat, {
-        image: fs.readFileSync(thumbPath),
-        caption: anu,
-        contextInfo: {
-            forwardingScore: 9,
-            isForwarded: true,
-            forwardedNewsletterMessageInfo: {
-                newsletterJid: config.saluranId,
-                newsletterName: config.saluranName,
-                serverMessageId: 127
-            }
-        }
-    }, { quoted: m })
+    await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
 }
 
+handler.help = ['menu']
 handler.tags = ['main']
-handler.command = /^(menu|help|h)$/i
-
+handler.command = /^(menu)$/i
 export default handler
