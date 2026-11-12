@@ -1102,14 +1102,28 @@ export default async function handler(conn, event, data) {
         return
     }
 
-    /// ─────────── [ Anti delete ] ────────── ///
+        /// ─────────── [ Anti delete ] ────────── ///
     if (event === 'revoke') {
         for (const { key, update } of data || []) {
             if (update?.messageStubType !== (proto?.WebMessageInfo?.StubType?.REVOKE ?? 1) || !key?.id) continue
+            // SKIP KALO INI PESAN CONFESS! BIAR GAK DI-FORWARD!
+            if (global.confessDelete?.has(key.id)) {
+                global.confessDelete.delete(key.id)
+                msgCache.delete(key.id)
+                continue
+            }
             const cached = msgCache.get(key.id)
             if (!cached || cached.key.fromMe) continue
             msgCache.delete(key.id)
             if (!getGroupSettings(cached.chat).delete) continue
+
+            // CEK ISI NYA JUGA! KALO ISI NYA .confess, SKIP!
+            let isi = ''
+            try {
+                let mm = cached.message || {}
+                isi = mm.conversation || mm.extendedTextMessage?.text || mm.imageMessage?.caption || mm.videoMessage?.caption || ''
+            } catch {}
+            if (String(isi).trim().toLowerCase().startsWith('.confess')) continue
 
             const sender = norm(cached.sender)
             await conn.sendMessage(cached.chat, {
