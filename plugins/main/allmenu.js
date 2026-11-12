@@ -1,98 +1,179 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
-import fs from 'fs'
-import sharp from 'sharp'
-import config from '../../config.js'
-import { runtime } from '../../lib/myfunc.js'
-import { plugins } from '../../handler.js'
+let handler = async (m, { conn, usedPrefix }) => {
+    let name = m.pushName || 'Bestie'
+    let runtime = process.uptime()
+    let jam = Math.floor(runtime / 3600)
+    let menit = Math.floor((runtime % 3600) / 60)
+    let detik = Math.floor(runtime % 60)
+    let runTime = `${jam} Jam ${menit} Menit ${detik} Detik`
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const thumbPath = path.join(__dirname, '../../media/thumb.jpg')
-const soundPath = path.join(__dirname, '../../media/sound.mp3')
+    let text = `👋 𝖧𝖾𝗅𝗈, @${m.sender.split('@')[0]} !
 
-let handler = async (m, { conn }) => {
-    const total = new Set(plugins.values()).size
-    
-    let thumb = await sharp(thumbPath)
-        .resize(300, 300)
-        .jpeg({ quality: 80 })
-        .toBuffer()
+╭───〔 𝗧𝗔𝗠𝗔 𝗕𝗢𝗧 〕───╮
+│ ✦ 𝖢𝗋𝖾𝖺𝗍𝗈𝗋 : wa.me/6285393659857
+│ ✦ 𝖵𝖾𝗋𝗌𝗂𝗈𝗇 : 𝟥.𝟢𝟢
+│ ✦ 𝖱𝗎𝗇𝗍𝗂𝗆𝖾 : ${runTime}
+│ ✦ 𝖯𝗋𝖾𝖿𝗂𝗑 : ${usedPrefix}
+╰─────────────────╯
 
-    let kat = {}
-    for (let p of new Set(plugins.values())) {
-        let tags = [].concat(p?.tags ?? [])
-            .filter(v => typeof v === 'string' && v.trim() !== '')
-            .map(v => v.trim())
-        if (!tags.length) continue
+╭───〔 🤖 𝗔𝗜 〕───╮
+│ • ${usedPrefix}bostama <pertanyaan>
+│ • ${usedPrefix}claude <pertanyaan>
+│ • ${usedPrefix}cloudflare <pertanyaan>
+│ • ${usedPrefix}deepseek <pertanyaan>
+│ • ${usedPrefix}feelbetter <pesan>
+│ • ${usedPrefix}gemini <pertanyaan>
+│ • ${usedPrefix}jokowi <pertanyaan>
+│ • ${usedPrefix}nanobanana <prompt>
+│ • ${usedPrefix}prabowo <pertanyaan>
+│ • ${usedPrefix}promptgen <teks>
+╰─────────────────╯
 
-        let help = [].concat(p?.help ?? [])
-            .filter(v => typeof v === 'string' && v.trim() !== '')
-            .map(v => v.trim())
-        if (!help.length) continue
+╭───〔 🐛 𝗕𝗨𝗚𝗦 〕───╮
+│ • ${usedPrefix}blank <nomor>
+│ • ${usedPrefix}delay <nomor>
+╰─────────────────╯
 
-        for (let tag of tags) {
-            let t = tag.charAt(0).toUpperCase() + tag.slice(1)
-            kat[t] ??= []
-            for (let h of help) {
-                if (!kat[t].includes(h)) kat[t].push(h)
-            }
-        }
-    }
+╭───〔 📥 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗥 〕───╮
+│ • ${usedPrefix}aio <link>
+│ • ${usedPrefix}capcut <url>
+│ • ${usedPrefix}mediafire <url>
+│ • ${usedPrefix}npmdl <paket>
+│ • ${usedPrefix}pindl <url>
+│ • ${usedPrefix}tiktok <link>
+╰─────────────────╯
 
-    let list = ''
-    let pref = config.prefix[0] || '.'
-    let urut = Object.keys(kat).sort()
+╭───〔 🎉 𝗙𝗨𝗡 〕───╮
+│ • ${usedPrefix}animehot
+│ • ${usedPrefix}cekgabut <@tag>
+│ • ${usedPrefix}cekpsikopat
+│ • ${usedPrefix}ceksisaumur <@tag>
+│ • ${usedPrefix}cektinggi <@tag>
+│ • ${usedPrefix}pap
+│ • ${usedPrefix}tobrut
+╰─────────────────╯
 
-    for (let nama of urut) {
-        list += `□ ./${nama}.js\n└────────\n`
-        for (let h of kat[nama].sort()) {
-            let noPrefix = /^[^a-z0-9]/i.test(h)
-            list += `│ ├─ ${noPrefix ? '' : pref}${h}\n`
-        }
-        list += `│ └────────\n\n`
-    }
-    
-    let msg = `\`👋 𝖧𝖾𝗅𝗈, 𝖶𝖾𝗅𝖼𝗈𝗆𝖾\``
-    
-    let anu = `◜🔔◞ *./𝖨𝗇𝖿𝗈𝗋𝗆𝖺𝗍𝗂𝗈𝗇.𝗃𝗌*
-└╼ *𝖢𝗋𝖾𝖺𝗍𝗈𝗋:* wa.me/6285393659857
-└╼ *𝖵𝖾𝗋𝗌𝗂𝗈𝗇:* 𝟥.𝟢𝟢
-└╼ *𝖱𝗎𝗇 𝖳𝗂𝗆𝖾:* ${runtime(process.uptime())}
+╭───〔 🎮 𝗚𝗔𝗠𝗘 〕───╮
+│ • ${usedPrefix}asahotak
+│ • ${usedPrefix}daily
+│ • ${usedPrefix}dompet
+│ • ${usedPrefix}family100
+│ • ${usedPrefix}kuismath
+│ • ${usedPrefix}pesawat
+│ • ${usedPrefix}slot
+│ • ${usedPrefix}sonic
+│ • ${usedPrefix}tebakangka
+│ • ${usedPrefix}tebakata
+│ • ${usedPrefix}transfer
+╰─────────────────╯
 
-${list}`
+╭───〔 👥 𝗚𝗥𝗢𝗨𝗣 〕───╮
+│ • ${usedPrefix}add
+│ • ${usedPrefix}adminonly <on/off>
+│ • ${usedPrefix}antibot <on/off/kick>
+│ • ${usedPrefix}antidelete <on/off>
+│ • ${usedPrefix}antijudol <on/off/kick>
+│ • ${usedPrefix}antilink <on/off>
+│ • ${usedPrefix}antispam <on/off/kick>
+│ • ${usedPrefix}antiswgc <on/off>
+│ • ${usedPrefix}antitagsw <on/off>
+│ • ${usedPrefix}antiunadmin <on/off>
+│ • ${usedPrefix}antivirtex <on/off/kick>
+│ • ${usedPrefix}close
+│ • ${usedPrefix}del
+│ • ${usedPrefix}demote <@tag>
+│ • ${usedPrefix}detect <on/off>
+│ • ${usedPrefix}idgc
+│ • ${usedPrefix}kick <@tag>
+│ • ${usedPrefix}linkgc
+│ • ${usedPrefix}open
+│ • ${usedPrefix}pinpesan <24j/7h/30h>
+│ • ${usedPrefix}promote <@tag>
+│ • ${usedPrefix}tagal <pesan>
+│ • ${usedPrefix}unpin
+│ • ${usedPrefix}welcome <on/off>
+╰─────────────────╯
 
-    // 1. MUSIK DULU BUNG! INI TAMBAHAN BARU, ASLI NYA GAK ADA!
-    try {
-        await conn.sendMessage(m.chat, {
-            audio: { url: soundPath },
-            mimetype: 'audio/mpeg',
-            ptt: false
-        }, { quoted: m })
-    } catch (e) {
-        console.log('Gagal kirim musik:', e)
-    }
+╭───〔 📣 𝗝𝗣𝗠 〕───╮
+│ • ${usedPrefix}jpmch <teks>
+│ • ${usedPrefix}stopjpmch
+╰─────────────────╯
 
-    // 2. MENU NYA! INI YANG GUA GANTI!
-    // DULU: pake locationMessage (PETA) + generateWAMessageFromContent
-    // SEKARANG: pake image langsung (FOTO LU) + sendMessage biasa
-    // JADI PETA NYA HILANG, GANTI FOTO LU!
-    await conn.sendMessage(m.chat, {
-        image: fs.readFileSync(thumbPath),
-        caption: `${msg}\n\n${anu}`,
-        footer: '© Rahmad-Pratama',
-        buttons: [
-            {
-                buttonId: '.menu',
-                buttonText: { displayText: 'back' },
-                type: 1
-            }
-        ],
-        headerType: 4
-    }, { quoted: m })
+╭───〔 📌 𝗠𝗔𝗜𝗡 〕───╮
+│ • ${usedPrefix}allmenu
+│ • ${usedPrefix}donasi
+│ • ${usedPrefix}donate
+│ • ${usedPrefix}ping
+│ • ${usedPrefix}sc
+╰─────────────────╯
+
+╭───〔 🎨 𝗠𝗔𝗞𝗘𝗥 〕───╮
+│ • ${usedPrefix}brat <teks>
+│ • ${usedPrefix}bratvid <teks>
+│ • ${usedPrefix}bratvid2 <teks>
+│ • ${usedPrefix}iqc <teks>
+│ • ${usedPrefix}jadianime
+│ • ${usedPrefix}jadihitam
+│ • ${usedPrefix}photolive
+│ • ${usedPrefix}sticker
+│ • ${usedPrefix}toimg
+│ • ${usedPrefix}tomp3
+│ • ${usedPrefix}tovn
+╰─────────────────╯
+
+╭───〔 ✨ 𝗠𝗖𝗧𝗔𝗠𝗔 〕───╮
+│ • ${usedPrefix}absen
+│ • ${usedPrefix}afk
+│ • ${usedPrefix}jodoh
+│ • ${usedPrefix}khodam
+│ • ${usedPrefix}reminder
+╰─────────────────╯
+
+╭───〔 👑 𝗢𝗪𝗡𝗘𝗥 〕───╮
+│ • ${usedPrefix}addowner <nomor>
+│ • ${usedPrefix}addplugin <nama>
+│ • ${usedPrefix}addprem <nomor>
+│ • ${usedPrefix}backup
+│ • ${usedPrefix}blacklist <nomor>
+│ • ${usedPrefix}delplugin <nama>
+│ • ${usedPrefix}getplugin <nama>
+│ • ${usedPrefix}listplugin
+│ • ${usedPrefix}public
+│ • ${usedPrefix}self
+│ • ${usedPrefix}swgc <teks>
+╰─────────────────╯
+
+╭───〔 🔍 𝗦𝗘𝗔𝗥𝗖𝗛 〕───╮
+│ • ${usedPrefix}kodepos <kota>
+│ • ${usedPrefix}play <judul>
+╰─────────────────╯
+
+╭───〔 🏪 𝗦𝗧𝗢𝗥𝗘 〕───╮
+│ • ${usedPrefix}done <username>, <item>, <nominal>
+│ • ${usedPrefix}payment
+│ • ${usedPrefix}proses <username>, <item>, <nominal>
+╰─────────────────╯
+
+╭───〔 🛠️ 𝗧𝗢𝗢𝗟𝗦 〕───╮
+│ • ${usedPrefix}cekgempa
+│ • ${usedPrefix}cekidch <link>
+│ • ${usedPrefix}cekmail <email>
+│ • ${usedPrefix}get <url>
+│ • ${usedPrefix}kalkulator <soal>
+│ • ${usedPrefix}pesanmail <id>
+│ • ${usedPrefix}rch <link_channel> <emoji>
+│ • ${usedPrefix}rvo
+│ • ${usedPrefix}ssweb <link>
+│ • ${usedPrefix}tempmail
+│ • ${usedPrefix}tobotak
+│ • ${usedPrefix}tourl
+╰─────────────────╯
+
+> _Ketik ${usedPrefix}allmenu buat liat semua!_`
+
+    await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
 }
 
-handler.help = ['allmenu']
+handler.help = ['allmenu', 'menu']
 handler.tags = ['main']
-handler.command = /^(allmenu|all)$/i
-
+handler.command = /^(allmenu|menu)$/i
 export default handler
