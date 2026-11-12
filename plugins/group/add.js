@@ -1,8 +1,27 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!m.isGroup) return m.reply('Perintah ini cuma bisa di grup bung!')
     
-    let botAdmin = m.isGroup ? (await conn.groupMetadata(m.chat)).participants.find(p => p.id === conn.user.jid)?.admin : false
-    if (!botAdmin) return m.reply('Bot harus jadi admin dulu bung biar bisa nambahin orang!')
+    // === CEK BOT ADMIN - VERSI BARU, NGERTI LID! ===
+    let metadata = await conn.groupMetadata(m.chat)
+    let participants = metadata.participants || []
+    
+    let botJid = conn.user.jid
+    let botLid = conn.user.lid || ''
+    let botNum = botJid.split('@')[0]
+
+    let botData = participants.find(p => {
+        let pid = p.id || ''
+        let plid = p.lid || ''
+        return pid === botJid || pid === botLid || plid === botLid || plid === botJid || pid.split('@')[0] === botNum || plid.split('@')[0] === botNum
+    })
+
+    let botAdmin = botData?.admin === 'admin' || botData?.admin === 'superadmin'
+    if (!botAdmin) return m.reply('Bot harus jadi admin dulu bung biar bisa nambahin orang! \n\nPadahal kalo bot lu udah admin tapi masih muncul ini, restart bot nya dulu biar ke refresh!')
+
+    // === CEK LU ADMIN APA BUKAN ===
+    let senderData = participants.find(p => (p.id || '') === m.sender || (p.lid || '') === m.sender)
+    let isAdmin = senderData?.admin === 'admin' || senderData?.admin === 'superadmin'
+    if (!isAdmin) return m.reply('Lu bukan admin grup bung! Cuma admin yang bisa add orang!')
 
     if (!args[0]) return m.reply(`Contoh: *${usedPrefix + command} 628123456789*`)
 
@@ -12,7 +31,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     let user = no + '@s.whatsapp.net'
     
-    // INI KUNCI NYA BUNG! AMBIL NAMA WA NYA LANGSUNG!
+    // AMBIL NAMA WA NYA LANGSUNG!
     let nama = await conn.getName(user) || no
 
     m.reply(`Lagi nambahin *${nama}* nih, tunggu...`)
@@ -22,7 +41,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         let status = res[0]?.status
         
         if (status == 200) {
-            // Pake tag biar nama nya muncul sesuai nama WA nya
             await conn.sendMessage(m.chat, { text: `✅ Berhasil! @${no} (${nama}) udah dimasukin ke grup!`, mentions: [user] }, { quoted: m })
         } else if (status == 403) {
             m.reply(`❌ Gagal nambahin *${nama}* bung! Privasi WA nya terkunci, jadi bot gak bisa add! Suruh dia join pake link grup aja!`)
@@ -32,6 +50,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             m.reply(`Gagal nambahin *${nama}* bung! Status: ${status}`)
         }
     } catch (e) {
+        console.log(e)
         m.reply(`Gagal nambahin *${nama}* bung! Pastikan nomor nya bener dan bot nya admin!`)
     }
 }
@@ -40,7 +59,7 @@ handler.help = ['add']
 handler.tags = ['group']
 handler.command = /^(add|tambah)$/i
 handler.group = true
-handler.admin = true
-handler.botAdmin = true
+handler.admin = false
+handler.botAdmin = false
 
 export default handler
