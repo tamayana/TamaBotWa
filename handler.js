@@ -741,140 +741,84 @@ export default async function handler(conn, event, data) {
                 if (/^BAE5/.test(m.key?.id || '') && String(m.key.id).length === 16) return
             }
             // ===== AFK SYSTEM - TAMBAHAN =====
-try {
-    if (!global.db) global.db = { data: { users: {} } }
-    if (!global.db.data.users) global.db.data.users = {}
-    let users = global.db.data.users
+            try {
+                if (!global.db) global.db = { data: { users: {} } }
+                if (!global.db.data.users) global.db.data.users = {}
+                let users = global.db.data.users
 
-    const cariMention = (obj, out = [], depth = 0) => {
-        if (!obj || typeof obj !== 'object' || depth > 6) return out
-        if (Array.isArray(obj)) { for (let v of obj) cariMention(v, out, depth + 1); return out }
-        for (let k in obj) {
-            if (k === 'mentionedJid' && Array.isArray(obj[k])) out.push(...obj[k])
-            else if (typeof obj[k] === 'object' && k !== 'conn' && k !== 'key') cariMention(obj[k], out, depth + 1)
-        }
-        return out
-    }
-    let mentionedAFK = [...new Set([
-        ...(m.mentionedJid || []),
-        ...cariMention(m.message),
-        ...cariMention(m.msg),
-        ...cariMention(m.message?.extendedTextMessage?.contextInfo),
-        ...cariMention(m.msg?.contextInfo)
-    ])]
+                const cariMention = (obj, out = [], depth = 0) => {
+                    if (!obj || typeof obj !== 'object' || depth > 6) return out
+                    if (Array.isArray(obj)) { for (let v of obj) cariMention(v, out, depth + 1); return out }
+                    for (let k in obj) {
+                        if (k === 'mentionedJid' && Array.isArray(obj[k])) out.push(...obj[k])
+                        else if (typeof obj[k] === 'object' && k !== 'conn' && k !== 'key') cariMention(obj[k], out, depth + 1)
+                    }
+                    return out
+                }
+                let mentionedAFK = [...new Set([
+                    ...(m.mentionedJid || []),
+                    ...cariMention(m.message),
+                    ...cariMention(m.msg),
+                    ...cariMention(m.message?.extendedTextMessage?.contextInfo),
+                    ...cariMention(m.msg?.contextInfo)
+                ])]
 
-    // Cuma ambil groupMetadata kalo di grup doang!
-    let meta = null
-    let isGroup = m.chat?.endsWith('@g.us')
-    if (isGroup) {
-        try { meta = await conn.groupMetadata(m.chat) } catch {}
-    }
-    const lidToPn = (jid) => {
-        let j = String(jid)
-        if (!j.endsWith('@lid')) return j
-        let p = (meta?.participants || []).find(x => String(x.lid) === j || String(x.id) === j)
-        if (p?.phoneNumber) return p.phoneNumber
-        if (p?.id && p.id.endsWith('@s.whatsapp.net')) return p.id
-        return j
-    }
-    const toPn = async (jid) => {
-        let j = lidToPn(jid)
-        if (!j.endsWith('@lid')) return j
-        try {
-            let pn = await conn.signalRepository?.lidMapping?.getPNForLID(j)
-            if (pn) return String(pn).includes('@') ? pn : pn + '@s.whatsapp.net'
-        } catch {}
-        return j
-    }
+                let meta = null
+                let isGroup = m.chat?.endsWith('@g.us')
+                if (isGroup) {
+                    try { meta = await conn.groupMetadata(m.chat) } catch {}
+                }
+                const lidToPn = (jid) => {
+                    let j = String(jid)
+                    if (!j.endsWith('@lid')) return j
+                    let p = (meta?.participants || []).find(x => String(x.lid) === j || String(x.id) === j)
+                    if (p?.phoneNumber) return p.phoneNumber
+                    if (p?.id && p.id.endsWith('@s.whatsapp.net')) return p.id
+                    return j
+                }
+                const toPn = async (jid) => {
+                    let j = lidToPn(jid)
+                    if (!j.endsWith('@lid')) return j
+                    try {
+                        let pn = await conn.signalRepository?.lidMapping?.getPNForLID(j)
+                        if (pn) return String(pn).includes('@') ? pn : pn + '@s.whatsapp.net'
+                    } catch {}
+                    return j
+                }
+                const cariUser = async (jid) => {
+                    let pn = await toPn(jid)
+                    if (users[pn]) return { jid: pn, data: users[pn] }
+                    for (let k in users) {
+                        if (!users[k]?.afk) continue
+                        let kPn = await toPn(k)
+                        if (kPn === pn || k === String(jid)) return { jid: k, data: users[k] }
+                        if (kPn.split('@')[0] === pn.split('@')[0]) return { jid: k, data: users[k] }
+                    }
+                    return null
+                }
 
-    const cariUser = async (jid) => {
-        let pn = await toPn(jid)
-        if (users[pn]) return { jid: pn, data: users[pn] }
-        for (let k in users) {
-            if (!users[k]?.afk) continue
-            let kPn = await toPn(k)
-            if (kPn === pn || k === String(jid)) return { jid: k, data: users[k] }
-            if (kPn.split('@')[0] === pn.split('@')[0]) return { jid: k, data: users[k] }
-        }
-        return null
-    }
+                if (mentionedAFK.length > 0) {
+                    let pnSender = await toPn(m.sender)
+                    for (let jid of mentionedAFK) {
+                        let pnTarget = await toPn(jid)
+                        if (pnTarget.split('@')[0] === pnSender.split('@')[0]) continue
+                        let found = await cariUser(jid)
+                        if (found?.data?.afk) {
+                            let lama = Math.floor((Date.now() - found.data.afk) / 60000)
+                            await conn.sendMessage(m.chat, { text: `*DIA LAGI AFK!* 💤\n\n@${pnTarget.split('@')[0]} lagi AFK ${lama < 1 ? 'baru aja' : lama + ' menit yang lalu'}!\nAlasan: ${found.data.afkReason || 'tanpa alasan'}\n\nJangan diganggu dulu!`, mentions: [pnTarget] }, { quoted: m })
+                        }
+                    }
+                }
 
-    if (mentionedAFK.length > 0) {
-        let pnSender = await toPn(m.sender)
-        for (let jid of mentionedAFK) {
-            let pnTarget = await toPn(jid)
-            if (pnTarget.split('@')[0] === pnSender.split('@')[0]) continue
-            let found = await cariUser(jid)
-            if (found?.data?.afk) {
-                let lama = Math.floor((Date.now() - found.data.afk) / 60000)
-                await conn.sendMessage(m.chat, { text: `*DIA LAGI AFK!* 💤\n\n@${pnTarget.split('@')[0]} lagi AFK ${lama < 1 ? 'baru aja' : lama + ' menit yang lalu'}!\nAlasan: ${found.data.afkReason || 'tanpa alasan'}\n\nJangan diganggu dulu!`, mentions: [pnTarget] }, { quoted: m })
-            }
-        }
-    }
-
-    let me = await cariUser(m.sender)
-    let low = (body || '').toLowerCase().trim()
-    if (me?.data?.afk && !low.startsWith('afk') && !low.startsWith('.afk')) {
-        me.data.afk = 0
-        me.data.afkReason = ''
-        await conn.sendMessage(m.chat, { text: `Welcome back! Lu udah gak AFK lagi!` }, { quoted: m })
-    }
-} catch (e) { console.log('AFK error:', e.message) }
-// ===== AKHIR AFK =====
-
-    // Ubah LID -> Nomor HP
-    const toPn = async (jid) => {
-        let j = String(jid || '')
-        if (!j.endsWith('@lid')) return j
-        try {
-            let pn = await conn.signalRepository?.lidMapping?.getPNForLID(j)
-            if (pn) return String(pn).includes('@') ? pn : pn + '@s.whatsapp.net'
-        } catch {}
-        return j
-    }
-
-    const cariUser = async (jid) => {
-        let pn = await toPn(jid)
-        if (users[pn]) return users[pn]
-        let nomor = pn.split('@')[0]
-        for (let k in users) {
-            if (k.split('@')[0] === nomor) return users[k]
-            let kPn = await toPn(k)
-            if (kPn.split('@')[0] === nomor) return users[k]
-        }
-        return null
-    }
-
-    // Ambil tag dari tempat yang bener, m.msg di sini kosong!
-    let mentionedAFK = m.message?.extendedTextMessage?.contextInfo?.mentionedJid
-        || m.message?.imageMessage?.contextInfo?.mentionedJid
-        || m.message?.videoMessage?.contextInfo?.mentionedJid
-        || m.message?.conversation?.contextInfo?.mentionedJid
-        || []
-
-    if (mentionedAFK.length > 0) {
-        for (let jid of mentionedAFK) {
-            let pnTarget = await toPn(jid)
-            let pnSender = await toPn(m.sender)
-            if (pnTarget.split('@')[0] === pnSender.split('@')[0]) continue
-            let target = await cariUser(jid)
-            if (target?.afk) {
-                let lama = Math.floor((Date.now() - target.afk) / 60000)
-                await conn.sendMessage(m.chat, { text: `*DIA LAGI AFK!* 💤\n\n@${pnTarget.split('@')[0]} lagi AFK ${lama < 1 ? 'baru aja' : lama + ' menit yang lalu'}!\nAlasan: ${target.afkReason}\n\nJangan diganggu dulu!` }, { quoted: m })
-            }
-        }
-    }
-
-    let me = await cariUser(m.sender)
-    let low = (body || '').toLowerCase().trim()
-    if (me?.afk && !low.startsWith('afk') && !low.startsWith('.afk')) {
-        let lama = Math.floor((Date.now() - me.afk) / 60000)
-        me.afk = 0
-        me.afkReason = ''
-        await conn.sendMessage(m.chat, { text: `Welcome back! Lu udah gak AFK lagi! Tadi AFK ${lama} menit!` }, { quoted: m })
-    }
-} catch (e) { console.log('AFK error:', e.message) }
-// ===== AKHIR AFK =====
+                let me = await cariUser(m.sender)
+                let low = (body || '').toLowerCase().trim()
+                if (me?.data?.afk && !low.startsWith('afk') && !low.startsWith('.afk')) {
+                    me.data.afk = 0
+                    me.data.afkReason = ''
+                    await conn.sendMessage(m.chat, { text: `Welcome back! Lu udah gak AFK lagi!` }, { quoted: m })
+                }
+            } catch (e) { console.log('AFK error:', e.message) }
+            // ===== AKHIR AFK =====
             if (!body) return
             if (config.botMode === 'self' && !m.isOwner && !m.fromMe) return
             if (!m.isOwner && isBlacklisted(m.sender)) return
