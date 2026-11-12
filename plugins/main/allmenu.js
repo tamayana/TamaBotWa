@@ -143,12 +143,6 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ • ${usedPrefix}play <judul>
 ╰─────────────────╯
 
-╭───〔 🏪 𝗦𝗧𝗢𝗥𝗘 〕───╮
-│ • ${usedPrefix}done <username>, <item>, <nominal>
-│ • ${usedPrefix}payment
-│ • ${usedPrefix}proses <username>, <item>, <nominal>
-╰─────────────────╯
-
 ╭───〔 🛠️ 𝗧𝗢𝗢𝗟𝗦 〕───╮
 │ • ${usedPrefix}cekgempa
 │ • ${usedPrefix}cekidch <link>
@@ -166,24 +160,11 @@ let handler = async (m, { conn, usedPrefix }) => {
 
 > _TAMA BOT - Gas pake bestie!_`
 
-    // 1. MUSIK DULU! PAKE media/sound.mp3
-    try {
-        if (fs.existsSync('./media/sound.mp3')) {
-            await conn.sendMessage(m.chat, { audio: fs.readFileSync('./media/sound.mp3'), mimetype: 'audio/mp4', ptt: true }, { quoted: m })
-        }
-    } catch (e) { console.log('Sound gagal:', e) }
+    // MUSIK - CUMA PAKE media/sound.mp3 AJA!
+    await conn.sendMessage(m.chat, { audio: fs.readFileSync('./media/sound.mp3'), mimetype: 'audio/mpeg', ptt: false }, { quoted: m })
 
-    // 2. FOTO + MENU! PAKE media/thumb.jpg DOANG!
-    // banner-tamabotwa.png GAK DIPAKE! ITU CUMA BUAT GITHUB!
-    try {
-        if (fs.existsSync('./media/thumb.jpg')) {
-            await conn.sendMessage(m.chat, { image: fs.readFileSync('./media/thumb.jpg'), caption: text, mentions: [m.sender] }, { quoted: m })
-        } else {
-            await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
-        }
-    } catch (e) {
-        await conn.sendMessage(m.chat, { text, mentions: [m.sender] }, { quoted: m })
-    }
+    // FOTO + MENU - PAKE media/thumb.jpg AJA!
+    await conn.sendMessage(m.chat, { image: fs.readFileSync('./media/thumb.jpg'), caption: text, mentions: [m.sender] }, { quoted: m })
 }
 
 handler.help = ['allmenu']
