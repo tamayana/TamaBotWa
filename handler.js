@@ -740,7 +740,43 @@ export default async function handler(conn, event, data) {
                 }
                 if (/^BAE5/.test(m.key?.id || '') && String(m.key.id).length === 16) return
             }
-
+   // ===== AFK SYSTEM - TAMBAHAN =====
+try {
+    if (!global.db) global.db = { data: { users: {} } }
+    if (!global.db.data.users) global.db.data.users = {}
+    const cariUser = (jid) => {
+        let users = global.db.data.users
+        if (users[jid]) return users[jid]
+        let nomor = String(jid).split('@')[0]
+        for (let k in users) {
+            if (k.split('@')[0] === nomor) return users[k]
+        }
+        return null
+    }
+    // Cek kalau ada yang ditag dan dia AFK
+    let mentionedAFK = m.msg?.contextInfo?.mentionedJid || m.message?.extendedTextMessage?.contextInfo?.mentionedJid || []
+    if (mentionedAFK.length > 0) {
+        for (let jid of mentionedAFK) {
+            if (String(jid).split('@')[0] === String(m.sender).split('@')[0]) continue
+            let target = cariUser(jid)
+            if (target?.afk) {
+                let lama = Math.floor((Date.now() - target.afk) / 60000)
+                let lamaTxt = lama < 1 ? 'baru aja' : `${lama} menit yang lalu`
+                await conn.sendMessage(m.chat, { text: `*DIA LAGI AFK!* 💤\n\n@${String(jid).split('@')[0]} lagi AFK ${lamaTxt}!\nAlasan: ${target.afkReason}\n\nJangan diganggu dulu!` }, { quoted: m })
+            }
+        }
+    }
+    // Kalau yang AFK chat lagi, matiin AFK-nya (kecuali dia ketik .afk lagi)
+    let me = cariUser(m.sender)
+    let lowerBody = (body || '').toLowerCase().trim()
+    if (me?.afk && lowerBody !== 'afk' && !lowerBody.startsWith('afk ') && !lowerBody.startsWith('.afk')) {
+        let lama = Math.floor((Date.now() - me.afk) / 60000)
+        me.afk = 0
+        me.afkReason = ''
+        await conn.sendMessage(m.chat, { text: `Welcome back! Lu udah gak AFK lagi! Tadi AFK ${lama} menit!` }, { quoted: m })
+    }
+} catch (e) { console.log('AFK error:', e.message) }
+// ===== AKHIR AFK =====
             if (!body) return
             if (config.botMode === 'self' && !m.isOwner && !m.fromMe) return
             if (!m.isOwner && isBlacklisted(m.sender)) return
