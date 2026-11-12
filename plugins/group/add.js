@@ -1,63 +1,58 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!m.isGroup) return m.reply('Perintah ini cuma bisa di grup bung!')
-    
-    // === CEK BOT ADMIN - VERSI BARU, NGERTI LID! ===
-    let metadata = await conn.groupMetadata(m.chat)
-    let participants = metadata.participants || []
-    
-    let botJid = conn.user.jid
-    let botLid = conn.user.lid || ''
-    let botNum = botJid.split('@')[0]
-
-    let botData = participants.find(p => {
-        let pid = p.id || ''
-        let plid = p.lid || ''
-        return pid === botJid || pid === botLid || plid === botLid || plid === botJid || pid.split('@')[0] === botNum || plid.split('@')[0] === botNum
-    })
-
-    let botAdmin = botData?.admin === 'admin' || botData?.admin === 'superadmin'
-    if (!botAdmin) return m.reply('Bot harus jadi admin dulu bung biar bisa nambahin orang! \n\nPadahal kalo bot lu udah admin tapi masih muncul ini, restart bot nya dulu biar ke refresh!')
-
-    // === CEK LU ADMIN APA BUKAN ===
-    let senderData = participants.find(p => (p.id || '') === m.sender || (p.lid || '') === m.sender)
-    let isAdmin = senderData?.admin === 'admin' || senderData?.admin === 'superadmin'
-    if (!isAdmin) return m.reply('Lu bukan admin grup bung! Cuma admin yang bisa add orang!')
-
-    if (!args[0]) return m.reply(`Contoh: *${usedPrefix + command} 628123456789*`)
+let handler = async (m, { conn, args }) => {
+    if (!m.isGroup) return m.reply('Cuma di grup bung!')
+    if (!args[0]) return m.reply('Mana nomornya? Contoh: .add 62812xxxx')
 
     let no = args[0].replace(/[^0-9]/g, '')
     if (no.startsWith('0')) no = '62' + no.slice(1)
-    if (no.length < 10) return m.reply('Nomor nya salah bung!')
+    let jid = no + '@s.whatsapp.net'
 
-    let user = no + '@s.whatsapp.net'
-    
-    // AMBIL NAMA WA NYA LANGSUNG!
-    let nama = await conn.getName(user) || no
+    // AMBIL NAMA GRUP BIAR ENAK CHATNYA
+    let groupName = 'grup ini'
+    try {
+        let metadata = await conn.groupMetadata(m.chat)
+        groupName = metadata.subject
+    } catch {}
 
-    m.reply(`Lagi nambahin *${nama}* nih, tunggu...`)
+    m.reply(`Oke gua coba add ${no} ya...`)
 
     try {
-        let res = await conn.groupParticipantsUpdate(m.chat, [user], 'add')
+        let res = await conn.groupParticipantsUpdate(m.chat, [jid], 'add')
         let status = res[0]?.status
-        
-        if (status == 200) {
-            await conn.sendMessage(m.chat, { text: `✅ Berhasil! @${no} (${nama}) udah dimasukin ke grup!`, mentions: [user] }, { quoted: m })
-        } else if (status == 403) {
-            m.reply(`❌ Gagal nambahin *${nama}* bung! Privasi WA nya terkunci, jadi bot gak bisa add! Suruh dia join pake link grup aja!`)
-        } else if (status == 408) {
-            m.reply(`❌ Gagal nambahin *${nama}* bung! Dia baru aja keluar dari grup ini, jadi gak bisa langsung di-add lagi!`)
-        } else {
-            m.reply(`Gagal nambahin *${nama}* bung! Status: ${status}`)
+
+        // 1. KALO BERHASIL LANGSUNG MASUK
+        if (status === '200') {
+            return m.reply(`✅ Berhasil! ${no} udah masuk grup!`)
         }
+
+        // 2. KALO GAGAL 403 = KENA PRIVASI, BOT LANGSUNG CHAT ORANGNYA!
+        if (status === '403') {
+            let code = res[0]?.content?.[0]?.content?.[0]?.attrs?.code
+            if (!code) return m.reply(`⚠️ Gagal! Nomor ${no} nge-privasi, gak bisa di-add langsung.`)
+
+            let link = 'https://chat.whatsapp.com/' + code
+
+            // BOT LANGSUNG CHAT KE NOMOR YANG MAU DI ADD!
+            try {
+                await conn.sendMessage(jid, { 
+                    text: `👋 Halo! Kamu diundang masuk ke grup *${groupName}* sama admin!\n\nGua mau add kamu langsung tapi privasi WA kamu nolak, jadi gua kirimin linknya aja ya!\n\nKlik link ini buat masuk:\n${link}\n\nDitunggu ya! Gas join! 🔥`
+                })
+                return m.reply(`✅ Udah gua chat langsung ke ${no}!\n\nGua kirimin link undangan ke WA dia, suruh dia klik linknya buat masuk!\nLinknya: ${link}`)
+            } catch (e) {
+                // KALO BOT GAK BISA CHAT DIA (MISAL DIA BLOCK BOT / NOMOR GAK ADA WA)
+                return m.reply(`⚠️ Gagal add langsung, dan gua juga gagal chat dia!\n\nMungkin dia block bot / nomornya gak ada WA.\nNih linknya, kirim manual aja:\n${link}`)
+            }
+        }
+
+        return m.reply(`Gagal add ${no}. Status: ${status}`)
+
     } catch (e) {
-        console.log(e)
-        m.reply(`Gagal nambahin *${nama}* bung! Pastikan nomor nya bener dan bot nya admin!`)
+        return m.reply(`ERROR: ${e.message}`)
     }
 }
 
 handler.help = ['add']
 handler.tags = ['group']
-handler.command = /^(add|tambah)$/i
+handler.command = /^(add)$/i
 handler.group = true
 handler.admin = false
 handler.botAdmin = false
