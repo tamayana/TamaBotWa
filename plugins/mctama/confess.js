@@ -1,16 +1,19 @@
 if (!global.confessPending) global.confessPending = {}
 if (!global.confessDelete) global.confessDelete = new Set()
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
-    let isiFull = text.trim()
+let handler = async (m, { conn }) => {
+    // PAKE m.text BIAR | NYA GAK ILANG
+    let raw = (m.text || '').trim()
+    // BUANG PREFIX + COMMAND NYA, SISAIN ARGUMEN NYA DOANG
+    // .confess TamaBotWa | yal -> jadi "TamaBotWa | yal"
+    let body = raw.replace(/^[./!#?]*confess/i, '').trim()
 
     // ===== 1. KALO DI GRUP =====
     if (m.isGroup) {
-        // HAPUS BIAR GAK KETAUAN
+        // BIAR ANTI DELETE GAK NANGKEP
         global.confessDelete.add(m.key.id)
         try { await conn.sendMessage(m.chat, { delete: m.key }) } catch {}
 
-        // INGET GRUP NYA
         let groupName = 'grup tadi'
         try {
             let meta = await conn.groupMetadata(m.chat).catch(() => null)
@@ -18,56 +21,43 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         } catch {}
         global.confessPending[m.sender] = { groupId: m.chat, groupName, time: Date.now() }
 
-        // JAPRI DIA
         await conn.sendMessage(m.sender, {
-            text: `Hai! Lu tadi mau confess di grup *${groupName}* ya?\n\nTinggal ketik aja confess lu disini! Nanti gua kirim ke grup *${groupName}* anonim!\n\nKalo lu udah hafal, next time lu bisa langsung japri aja gini:\n*.confess ${groupName} | isi confess lu*\n\nGak usah balik ke grup lagi!`
+            text: `Hai! Lu tadi mau confess di grup *${groupName}* ya?\n\nTinggal ketik aja confess lu disini! Nanti gua kirim ke grup *${groupName}* anonim!\n\nKalo udah hafal, next time langsung japri aja:\n*.confess ${groupName} | isi confess lu*`
         }).catch(() => {})
         return
     }
 
     // ===== 2. KALO DI JAPRI =====
-    // 2A. JAPRI DENGAN FORMAT: .confess NamaGrup | isi
-    // Contoh: .confess TamaBotWa | mantap
-    if (isiFull.toLowerCase().startsWith('confess') || isiFull.toLowerCase().startsWith('.confess')) {
-        let after = isiFull.replace(/^\.?confess/i, '').trim()
-        // Kalo ada | berarti dia mode PRO, udah tau nama grup!
-        if (after.includes('|')) {
-            let [namaGrup, ...isiArr] = after.split('|')
-            namaGrup = namaGrup.trim()
-            let isi = isiArr.join('|').trim()
-            if (!namaGrup || !isi) return m.reply(`Formatnya: *.confess NamaGrup | isi*\nContoh: *.confess TamaBotWa | aku suka kamu*`)
+    // 2A. MODE PRO: ADA | -> .confess TamaBotWa | yal
+    if (body.includes('|')) {
+        let [namaGrup, ...isiArr] = body.split('|')
+        namaGrup = namaGrup.trim()
+        let isi = isiArr.join('|').trim()
+        if (!namaGrup || !isi) return m.reply(`Formatnya: *.confess NamaGrup | isi*\nContoh: *.confess TamaBotWa | aku suka kamu*`)
 
-            // CARI GRUP NYA DI DAFTAR GRUP BOT
-            let allGroups = await conn.groupFetchAllParticipating().catch(() => ({}))
-            let found = Object.values(allGroups).find(g => g.subject.toLowerCase() === namaGrup.toLowerCase())
-            if (!found) found = Object.values(allGroups).find(g => g.subject.toLowerCase().includes(namaGrup.toLowerCase()))
+        let allGroups = await conn.groupFetchAllParticipating().catch(() => ({}))
+        let list = Object.values(allGroups)
+        let found = list.find(g => (g.subject || '').toLowerCase() === namaGrup.toLowerCase())
+        if (!found) found = list.find(g => (g.subject || '').toLowerCase().includes(namaGrup.toLowerCase()))
 
-            if (!found) return m.reply(`Grup *${namaGrup}* gak ketemu! Coba cek nama grup nya bener gak? Atau ketik *.confess* di grup itu dulu biar gua tau!`)
+        if (!found) return m.reply(`Grup *${namaGrup}* gak ketemu! Bot harus udah masuk ke grup itu! Coba ketik *.confess* dulu di grup itu!`)
 
-            await conn.sendMessage(found.id, { text: `💌 *CONFESS ANONIM!*\n\n"${isi}"\n\n_Dari: Seseorang yang rahasia 🤫_` })
-            return m.reply(`✅ Udah gua kirim ke grup *${found.subject}*! Anonim! Aman!`)
-        }
-
-        // Kalo .confess doang di japri tapi gak ada | dan gak ada pending, kasih tau 2 cara
-        if (!global.confessPending[m.sender]) {
-            return m.reply(`Lu mau confess ke grup mana?\n\nAda 2 cara:\n\n1. CARA GAMPANG (Buat pemula):\nBalik ke grup lu, ketik di grup: *.confess*\nNanti gua yang japri lu!\n\n2. CARA CEPET (Kalo lu udah tau):\nJapri gua langsung gini:\n*.confess NamaGrup | isi confess lu*\nContoh: *.confess TamaBotWa | mantap*`)
-        }
-        // Kalo ada pending, lanjut ke bawah (anggap isi nya = confess)
-        isiFull = after || isiFull
+        await conn.sendMessage(found.id, { text: `💌 *CONFESS ANONIM!*\n\n"${isi}"\n\n_Dari: Seseorang yang rahasia 🤫_` })
+        return m.reply(`✅ Udah gua kirim ke grup *${found.subject}*! Anonim! Aman!`)
     }
 
-    // 2B. JAPRI BIASA TAPI UDAH PERNAH .confess DI GRUP = ANGGAP ITU ISI CONFESS
+    // 2B. MODE PEMULA: UDAH PERNAH .confess DI GRUP, TINGGAL KETIK ISI NYA
     if (global.confessPending[m.sender]) {
-        let isi = isiFull.replace(/^\.?confess/i, '').trim()
+        let isi = body.trim()
         if (!isi) return m.reply('Ketik confess lu! Contoh: aku suka sama kamu')
         let target = global.confessPending[m.sender]
         delete global.confessPending[m.sender]
         await conn.sendMessage(target.groupId, { text: `💌 *CONFESS ANONIM!*\n\n"${isi}"\n\n_Dari: Seseorang yang rahasia 🤫_` })
-        return m.reply(`✅ Udah gua kirim ke grup *${target.groupName}*! Anonim! Aman!\n\nNext time lu bisa langsung japri aja: *.confess ${target.groupName} | isi lu*`)
+        return m.reply(`✅ Udah gua kirim ke grup *${target.groupName}*! Anonim! Aman!`)
     }
 
-    // 2C. JAPRI TAPI GAK ADA PENDING + GAK ADA FORMAT = KASIH TAU CARA NYA
-    return m.reply(`Lu mau confess ke grup mana?\n\nKetik di grup lu: *.confess*\nAtau langsung japri: *.confess NamaGrup | isi lu*`)
+    // 2C. GAK ADA | GAK ADA PENDING
+    return m.reply(`Lu mau confess ke grup mana?\n\nCara 1 (Pemula):\nBalik ke grup, ketik: *.confess*\n\nCara 2 (Cepet):\nJapri gua: *.confess TamaBotWa | isi lu*`)
 }
 
 handler.help = ['confess']
