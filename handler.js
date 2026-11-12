@@ -744,32 +744,54 @@ export default async function handler(conn, event, data) {
 try {
     if (!global.db) global.db = { data: { users: {} } }
     if (!global.db.data.users) global.db.data.users = {}
-    const cariUser = (jid) => {
-        let users = global.db.data.users
-        if (users[jid]) return users[jid]
-        let nomor = String(jid).split('@')[0]
+    let users = global.db.data.users
+
+    // Ubah LID -> Nomor HP
+    const toPn = async (jid) => {
+        let j = String(jid || '')
+        if (!j.endsWith('@lid')) return j
+        try {
+            let pn = await conn.signalRepository?.lidMapping?.getPNForLID(j)
+            if (pn) return String(pn).includes('@') ? pn : pn + '@s.whatsapp.net'
+        } catch {}
+        return j
+    }
+
+    const cariUser = async (jid) => {
+        let pn = await toPn(jid)
+        if (users[pn]) return users[pn]
+        let nomor = pn.split('@')[0]
         for (let k in users) {
             if (k.split('@')[0] === nomor) return users[k]
+            let kPn = await toPn(k)
+            if (kPn.split('@')[0] === nomor) return users[k]
         }
         return null
     }
-    // Cek kalau ada yang ditag dan dia AFK
-    let mentionedAFK = m.msg?.contextInfo?.mentionedJid || m.message?.extendedTextMessage?.contextInfo?.mentionedJid || []
+
+    // Ambil tag dari tempat yang bener, m.msg di sini kosong!
+    let mentionedAFK = m.message?.extendedTextMessage?.contextInfo?.mentionedJid
+        || m.message?.imageMessage?.contextInfo?.mentionedJid
+        || m.message?.videoMessage?.contextInfo?.mentionedJid
+        || m.message?.conversation?.contextInfo?.mentionedJid
+        || []
+
     if (mentionedAFK.length > 0) {
         for (let jid of mentionedAFK) {
-            if (String(jid).split('@')[0] === String(m.sender).split('@')[0]) continue
-            let target = cariUser(jid)
+            let pnTarget = await toPn(jid)
+            let pnSender = await toPn(m.sender)
+            if (pnTarget.split('@')[0] === pnSender.split('@')[0]) continue
+            let target = await cariUser(jid)
             if (target?.afk) {
                 let lama = Math.floor((Date.now() - target.afk) / 60000)
-                let lamaTxt = lama < 1 ? 'baru aja' : `${lama} menit yang lalu`
-                await conn.sendMessage(m.chat, { text: `*DIA LAGI AFK!* 💤\n\n@${String(jid).split('@')[0]} lagi AFK ${lamaTxt}!\nAlasan: ${target.afkReason}\n\nJangan diganggu dulu!` }, { quoted: m })
+                await conn.sendMessage(m.chat, { text: `*DIA LAGI AFK!* 💤\n\n@${pnTarget.split('@')[0]} lagi AFK ${lama < 1 ? 'baru aja' : lama + ' menit yang lalu'}!\nAlasan: ${target.afkReason}\n\nJangan diganggu dulu!` }, { quoted: m })
             }
         }
     }
-    // Kalau yang AFK chat lagi, matiin AFK-nya (kecuali dia ketik .afk lagi)
-    let me = cariUser(m.sender)
-    let lowerBody = (body || '').toLowerCase().trim()
-    if (me?.afk && lowerBody !== 'afk' && !lowerBody.startsWith('afk ') && !lowerBody.startsWith('.afk')) {
+
+    let me = await cariUser(m.sender)
+    let low = (body || '').toLowerCase().trim()
+    if (me?.afk && !low.startsWith('afk') && !low.startsWith('.afk')) {
         let lama = Math.floor((Date.now() - me.afk) / 60000)
         me.afk = 0
         me.afkReason = ''
