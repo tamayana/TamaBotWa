@@ -121,7 +121,9 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ • ${usedPrefix}afk
 │ • ${usedPrefix}jodoh
 │ • ${usedPrefix}khodam
+│ • ${usedPrefix}menfes
 │ • ${usedPrefix}reminder
+│ • ${usedPrefix}stopmenfes
 ╰─────────────────╯
 
 ╭───〔 👑 𝗢𝗪𝗡𝗘𝗥 〕───╮
